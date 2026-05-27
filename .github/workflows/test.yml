@@ -47,7 +47,7 @@ jobs:
         run: pnpm test:debug
 
       - name: Install Playwright browsers
-        run: pnpm --filter twitter-api-safe-proxy exec playwright install --with-deps chromium
+        run: pnpm --filter twitter-api-safe-proxy exec playwright install chromium
 
       - name: Run request tests
         run: pnpm test:request
