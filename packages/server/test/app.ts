@@ -21,8 +21,8 @@ describe("someFunction", () => {
 			viewport: undefined,
 		});
 		const page = await browser.newPage();
-		await page.goto("https://x.com/home");
 		const client = await injectTwitterClient(page);
+		await page.goto("https://x.com/home");
 
 		const app = await createApp(() => client);
 		integration.cleanup(async () => {

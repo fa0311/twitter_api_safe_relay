@@ -23,8 +23,9 @@ const browser = await Promise.all(
 		});
 		logger.info(`Browser for profile "${profile.name}" launched successfully`);
 		const page = await browser.newPage();
-		const client = injectTwitterClient(page);
+		const client = await injectTwitterClient(page);
 		await page.goto(profile.home.url);
+		await client.waitStartup();
 		return client;
 	}),
 );
