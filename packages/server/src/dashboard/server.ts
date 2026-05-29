@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import { serve } from "@hono/node-server";
+import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { injectTwitterClient } from "twitter-api-safe-request";
 import createApp from "../app.js";
@@ -42,5 +43,6 @@ const app = new Hono();
 
 app.route("/", debugApi);
 app.route("/", proxyApi);
+app.use("/*", serveStatic({ root: "../debug/dist" }));
 
 serve({ fetch: app.fetch, port: debugPort });
