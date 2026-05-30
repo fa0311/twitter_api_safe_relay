@@ -7,7 +7,7 @@ services:
     image: twitter-api-safe-dashboard
     restart: unless-stopped
     ports:
-      - "6900:3001"
+      - "6900:3000"
       - "6901:6901"
     shm_size: "2gb"
     environment:

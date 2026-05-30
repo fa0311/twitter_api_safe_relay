@@ -14,7 +14,7 @@ This package only owns the Vite UI. The debug API and replay proxy live in `twit
 pnpm --filter twitter-api-safe-proxy dev:debug
 ```
 
-In dev mode, the UI runs on port `3000` and proxies `/api/events` plus `/i/api/graphql/*` to the debug server on port `3001`.
+In dev mode, the UI runs on port `5173` and proxies `/api/events` plus `/i/api/graphql/*` to the debug server on port `3000`.
 
 From the repository root, run these in separate terminals:
 

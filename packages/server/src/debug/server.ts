@@ -10,7 +10,6 @@ import { randomChoice } from "../utils/random.js";
 import { loadSettings } from "../utils/settings.js";
 import { createDebugApp } from "./app.js";
 
-const debugPort = 3001;
 
 const settings = await loadSettings(JSON.parse(await fs.readFile("./../../settings.json", "utf-8")));
 const logger = createLogger({ logLevel: settings.logLevel, logPrettyPrint: settings.logPrettyPrint });
@@ -46,5 +45,5 @@ app.route("/", proxyApi);
 app.use("/*", serveStatic({ root: "../dashboard/dist" }));
 
 
-console.log(`Debug server is running on http://localhost:${debugPort}`);
-serve({ fetch: app.fetch, port: debugPort });
+console.log(`Debug server is running on http://localhost:${settings.port}`);
+serve({ fetch: app.fetch, port: settings.port });

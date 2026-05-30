@@ -67,5 +67,5 @@ WORKDIR /twitter_api_safe_proxy/packages/server
 
 ENV VNC_PW=password
 
-EXPOSE 3001
+# EXPOSE 3000
 
