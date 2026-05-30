@@ -2,7 +2,7 @@ set -e
 
 export DISPLAY="${DISPLAY:-:1}"
 
-rm -f /twitter_api_safe_proxy/user_data/*/Singleton*
+rm -f /home/kasm-user/.config/google-chrome/*/Singleton*
 
 cd /twitter_api_safe_proxy/packages/server
 
