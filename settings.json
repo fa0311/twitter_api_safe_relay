@@ -5,6 +5,7 @@
 		{
 			"name": "account1",
 			"browser": {
+				"type": "launch",
 				"userDataDir": "./../../user_data/account1",
 				"headless": false,
 				"viewport": { "width": 720, "height": 720 }
