@@ -40,7 +40,8 @@ const clients = await Promise.all(
 		logger.info(`Browser for profile "${profile.name}" launched successfully`);
 		const page = await browser.newPage();
 		const client = createTwitterBrowser(page);
-		await page.goto(profile.home.url);
+		await client.inject();
+		await client.goto(profile.home.url);
 		return client;
 	}),
 );

@@ -24,7 +24,7 @@ describe("someFunction", () => {
 		const page = await browser.newPage();
 		const client = createTwitterBrowser(page);
 		await client.inject();
-		await page.goto("https://x.com/home");
+		await client.goto("https://x.com/home");
 
 		const app = await createApp(() => client);
 		integration.cleanup(async () => {

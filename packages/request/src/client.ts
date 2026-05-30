@@ -28,6 +28,7 @@ export type TwitterApiProfileClient = {
 	debugStream: ReadableStream<unknown>;
 	enableDebug: () => Promise<void>;
 	waitStartup: () => Promise<void>;
+	goto: (url: string) => Promise<void>;
 	page: Page;
 };
 
@@ -86,5 +87,10 @@ export const createTwitterBrowser = (page: Page): TwitterApiProfileClient => {
 
 	const waitStartup = async () => await page.evaluate(() => globalThis.elonmusk_114514_wait_startup.promise);
 
-	return { graphQL, graphQLFullResponse, dispatch, page, waitStartup, debugStream, enableDebug, inject };
+	const goto = async (url: string) => {
+		await page.goto(url);
+		await waitStartup();
+	};
+
+	return { graphQL, graphQLFullResponse, dispatch, page, waitStartup, debugStream, enableDebug, inject, goto };
 };

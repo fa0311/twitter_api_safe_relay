@@ -13,7 +13,7 @@ describe("someFunction", () => {
 		const page = await context.newPage();
 		const client = createTwitterBrowser(page);
 		await client.inject();
-		await page.goto("https://x.com/home");
+		await client.goto("https://x.com/home");
 
 		const result = await client.graphQLFullResponse(
 			{

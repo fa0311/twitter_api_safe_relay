@@ -34,17 +34,13 @@ export const createDebugApp = (clients: TwitterApiProfileClient[]) => {
 	};
 	const count = createCounter();
 
-	app.get("/api/enable-debug", (c) => {
-		return c.json({ enabled: count.getCount() > 0 });
-	});
-
 	app.post("/api/enable-debug", async (c) => {
 		const currentCount = count.increment();
 		if (currentCount === 1) {
 			await Promise.all(
 				clients.map(async (client) => {
 					await client.inject();
-					await client.waitStartup();
+					await client.goto(client.page.url());
 					await client.enableDebug();
 					void client.debugStream.pipeTo(new WritableStream({ write: emit }));
 				}),

@@ -37,8 +37,7 @@ const browser = await Promise.all(
 		const page = await browser.newPage();
 		const client = createTwitterBrowser(page);
 		await client.inject();
-		await page.goto(profile.home.url);
-		await client.waitStartup();
+		await client.goto(profile.home.url);
 		return client;
 	}),
 );
