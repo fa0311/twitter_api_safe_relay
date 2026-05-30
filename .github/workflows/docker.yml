@@ -24,8 +24,8 @@ jobs:
         include:
           - target: proxy
             suffix: proxy
-          - target: debug
-            suffix: debug
+          - target: dashboard
+            suffix: dashboard
 
     steps:
       - name: Checkout
