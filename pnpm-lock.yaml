@@ -18,7 +18,7 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
-  packages/debug:
+  packages/dashboard:
     dependencies:
       '@codemirror/lang-javascript':
         specifier: ^6.2.5

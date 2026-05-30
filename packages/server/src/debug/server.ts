@@ -43,6 +43,8 @@ const app = new Hono();
 
 app.route("/", debugApi);
 app.route("/", proxyApi);
-app.use("/*", serveStatic({ root: "../debug/dist" }));
+app.use("/*", serveStatic({ root: "../dashboard/dist" }));
 
+
+console.log(`Debug server is running on http://localhost:${debugPort}`);
 serve({ fetch: app.fetch, port: debugPort });

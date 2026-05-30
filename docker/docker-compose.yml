@@ -3,7 +3,7 @@ services:
   dashboard:
     build:
       context: .
-      target: dashboard
+      target: debug
     image: twitter-api-safe-dashboard
     restart: unless-stopped
     ports:

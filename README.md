@@ -46,10 +46,10 @@ pnpm exec playwright install
 
 ## Tests
 
-Run the debug dashboard unit tests:
+Run the dashboard unit tests:
 
 ```sh
-pnpm test:debug
+pnpm test:dashboard
 ```
 
 The request and proxy test scripts exercise browser-backed integration flows:

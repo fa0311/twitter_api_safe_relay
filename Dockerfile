@@ -37,7 +37,7 @@ FROM runtime AS proxy
 CMD ["node", "dist/server.js"]
 
 
-FROM kasmweb/chrome:1.18.0 AS dashboard
+FROM kasmweb/chrome:1.18.0 AS debug
 
 USER root
 

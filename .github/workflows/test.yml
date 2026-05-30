@@ -43,8 +43,8 @@ jobs:
       - name: Type check
         run: pnpm type-check
 
-      - name: Run debug tests
-        run: pnpm test:debug
+      - name: Run dashboard tests
+        run: pnpm test:dashboard
 
       - name: Install Playwright browsers
         run: pnpm --filter twitter-api-safe-proxy exec playwright install --with-deps chromium

@@ -1,7 +1,7 @@
 {
-	"name": "twitter-api-safe-debug",
+	"name": "twitter-api-safe-dashboard",
 	"version": "0.0.1",
-	"description": "Vite debug dashboard for Twitter/X web API requests captured through twitter-api-safe-request.",
+	"description": "Vite dashboard UI for inspecting Twitter/X web API requests captured through twitter-api-safe-request.",
 	"type": "module",
 	"scripts": {
 		"clean": "rimraf dist",

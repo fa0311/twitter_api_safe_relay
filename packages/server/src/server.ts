@@ -32,4 +32,5 @@ const browser = await Promise.all(
 
 const app = await createApp(() => randomChoice(browser));
 
+console.log(`Proxy server is running on http://localhost:${settings.port}`);
 serve({ fetch: app.fetch, port: settings.port });
