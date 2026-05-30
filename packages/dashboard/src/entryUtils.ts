@@ -236,6 +236,18 @@ export const defaultScriptOf = (entry: DebugEntry): string => {
 	].join("\n");
 };
 
+// Collapse entries that share the same method + path, keeping only the most
+// recent request. GET /foo and POST /foo are treated as distinct.
+export const dedupeLatestByPath = (entries: DebugEntry[]): DebugEntry[] => {
+	const latest = new Map<string, DebugEntry>();
+	for (const entry of entries) {
+		const key = `${entry.method} ${entry.path}`;
+		const existing = latest.get(key);
+		if (!existing || entry.requestAt > existing.requestAt) latest.set(key, entry);
+	}
+	return [...latest.values()];
+};
+
 export const formatTime = (value: number): string =>
 	new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(value);
 

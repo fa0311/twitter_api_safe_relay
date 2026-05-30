@@ -1,12 +1,14 @@
 import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
+import type { TwitterApiProfileClient } from "twitter-api-safe-request";
+import { createCounter } from "../utils/counter.js";
 
-export const createDebugApp = () => {
+export const createDebugApp = (clients: TwitterApiProfileClient[]) => {
 	const listeners = new Set<(entry: unknown) => void>();
 	const app = new Hono();
 
-	app.get("/api/events", (c) =>
-		streamSSE(c, async (stream) => {
+	app.get("/api/events", (c) => {
+		return streamSSE(c, async (stream) => {
 			const listener = (entry: unknown) => {
 				void stream.writeSSE({
 					event: "entry",
@@ -22,14 +24,34 @@ export const createDebugApp = () => {
 				});
 			}
 			listeners.delete(listener);
-		}),
-	);
+		});
+	});
 
 	const emit = (entry: unknown) => {
 		for (const listener of listeners) {
 			listener(entry);
 		}
 	};
+	const count = createCounter();
 
-	return { app, emit } as const;
+	app.get("/api/enable-debug", (c) => {
+		return c.json({ enabled: count.getCount() > 0 });
+	});
+
+	app.post("/api/enable-debug", async (c) => {
+		const currentCount = count.increment();
+		if (currentCount === 1) {
+			await Promise.all(
+				clients.map(async (client) => {
+					await client.enableDebug();
+					void client.debugStream.pipeTo(new WritableStream({ write: emit }));
+				}),
+			);
+
+			return c.json({ success: true, message: "Debug mode enabled" });
+		} else {
+			return c.json({ success: false, message: "Debug mode is already enabled" });
+		}
+	});
+	return app;
 };

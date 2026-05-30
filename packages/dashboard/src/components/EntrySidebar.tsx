@@ -16,7 +16,7 @@ export const EntrySidebar = () => {
 	return (
 		<section className="grid min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] border-[#d9e0ea] border-r bg-white max-[900px]:border-r-0 max-[900px]:border-b">
 			<EntryStatsBar stats={stats} />
-			<EntryToolbar filters={filters} onFiltersChange={setFilters} />
+			<EntryToolbar filters={filters} onFiltersChange={setFilters} visibleEntries={visibleEntries} />
 			<EntryList entries={visibleEntries} newEntryIds={newEntryIds} />
 		</section>
 	);

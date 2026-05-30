@@ -10,11 +10,9 @@ import { randomChoice } from "../utils/random.js";
 import { loadSettings } from "../utils/settings.js";
 import { createDebugApp } from "./app.js";
 
-
 const settings = await loadSettings(JSON.parse(await fs.readFile("./../../settings.json", "utf-8")));
 const logger = createLogger({ logLevel: settings.logLevel, logPrettyPrint: settings.logPrettyPrint });
 
-const { app: debugApi, emit } = createDebugApp();
 const clients = await Promise.all(
 	settings.profiles.map(async (profile) => {
 		const browser = await createBrowser({
@@ -31,8 +29,7 @@ const clients = await Promise.all(
 		const page = await browser.newPage();
 		const client = await injectTwitterClient(page);
 		await page.goto(profile.home.url);
-		await client.enableDebug();
-		void client.debugStream.pipeTo(new WritableStream({ write: emit }));
+		await client.waitStartup();
 		return client;
 	}),
 );
@@ -40,10 +37,10 @@ const clients = await Promise.all(
 const proxyApi = await createApp(() => randomChoice(clients));
 const app = new Hono();
 
+const debugApi = createDebugApp(clients);
 app.route("/", debugApi);
 app.route("/", proxyApi);
 app.use("/*", serveStatic({ root: "../dashboard/dist" }));
-
 
 console.log(`Debug server is running on http://localhost:${settings.port}`);
 serve({ fetch: app.fetch, port: settings.port });

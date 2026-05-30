@@ -1,4 +1,4 @@
-import type { DebugEntry, MethodFilter, VersionFilter } from "./entryUtils";
+import { type DebugEntry, dedupeLatestByPath, type MethodFilter, type VersionFilter } from "./entryUtils";
 
 export type SortMode = "newest" | "oldest" | "label" | "method";
 
@@ -7,6 +7,7 @@ export type EntryFilters = {
 	version: VersionFilter;
 	query: string;
 	sort: SortMode;
+	dedupeLatest: boolean;
 };
 
 export const initialEntryFilters: EntryFilters = {
@@ -14,6 +15,7 @@ export const initialEntryFilters: EntryFilters = {
 	query: "",
 	sort: "newest",
 	version: "all",
+	dedupeLatest: false,
 };
 
 export const filterAndSortEntries = (entries: DebugEntry[], filters: EntryFilters): DebugEntry[] => {
@@ -24,7 +26,8 @@ export const filterAndSortEntries = (entries: DebugEntry[], filters: EntryFilter
 		if (query && !entry.searchText.includes(query)) return false;
 		return true;
 	});
-	return filtered.toSorted(compareBy[filters.sort]);
+	const deduped = filters.dedupeLatest ? dedupeLatestByPath(filtered) : filtered;
+	return deduped.toSorted(compareBy[filters.sort]);
 };
 
 const compareBy: Record<SortMode, (a: DebugEntry, b: DebugEntry) => number> = {

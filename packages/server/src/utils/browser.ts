@@ -1,6 +1,6 @@
 import { chromium, firefox, webkit } from "playwright";
 
-type createBrowserSettings = {
+type CreateBrowserSettings = {
 	browserType: "chromium" | "firefox" | "webkit";
 	userDataDir: string;
 	headless: boolean | undefined;
@@ -11,7 +11,7 @@ type createBrowserSettings = {
 	viewport: { width: number; height: number } | undefined;
 };
 
-export const createBrowser = async (settings: createBrowserSettings) => {
+export const createBrowser = async (settings: CreateBrowserSettings) => {
 	const browser = { chromium, firefox, webkit }[settings.browserType];
 	const context = await browser.launchPersistentContext(settings.userDataDir, {
 		headless: settings.headless,

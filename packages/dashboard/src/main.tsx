@@ -1,5 +1,6 @@
 import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
+import { DebugControl } from "./components/DebugControl";
 import { DetailPane } from "./components/DetailPane";
 import { EntrySidebar } from "./components/EntrySidebar";
 import { useDebugEntriesStore } from "./store";
@@ -26,6 +27,7 @@ const App = () => {
 						<div className="font-bold text-[15px]">Twitter API Debug</div>
 						<div className="text-[#667386] text-xs">Captured createApp traffic and GraphQL execution</div>
 					</div>
+					<DebugControl />
 					<ConnectionBadge />
 				</div>
 			</header>
