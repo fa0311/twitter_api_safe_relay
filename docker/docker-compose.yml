@@ -1,17 +1,27 @@
 services:
-  dashboard:
-    image: ghcr.io/fa0311/twitter_api_safe_proxy:latest-dashboard
+  kasmweb:
+    image: kasmweb/chrome:1.18.0
+    container_name: kasmweb
     restart: unless-stopped
     ports:
-      - "6900:3000"
       - "6901:6901"
+      - "6900:3000"
     shm_size: "2gb"
     environment:
-      VNC_PW: "password" # user: kasm_user
+      VNC_PW: "password" # kasm_user
+      APP_ARGS: "--start-maximized --user-data-dir=/home/kasm-user/chrome-profile --password-store=basic --remote-debugging-port=9222"
     volumes:
-      - ./settings.json:/twitter_api_safe_proxy/settings.json:ro
-      - dashboard_user_data:/twitter_api_safe_proxy/user_data
+      - dashboard_user_data:/home/kasm-user/chrome-profile
+
+  dashboard:
+    image: ghcr.io/fa0311/twitter_api_safe_proxy:latest-debug
+    container_name: twitter_api_safe_proxy
+    restart: unless-stopped
+    network_mode: "service:kasmweb"
+    volumes:
+      - ./settings.json:/app/settings.json:ro
+    depends_on:
+      - kasmweb
 
 volumes:
-  proxy_user_data:
   dashboard_user_data:

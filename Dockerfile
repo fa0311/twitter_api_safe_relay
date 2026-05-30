@@ -36,27 +36,3 @@ CMD ["node", "dist/server.js"]
 FROM runtime AS debug
 
 CMD ["node", "dist/debug/server.js"]
-
-FROM kasmweb/chrome:1.18.0 AS dashboard
-
-USER root
-
-WORKDIR /twitter_api_safe_proxy
-
-ENV NODE_ENV=production
-
-RUN apt-get update \
-    && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
-    && apt-get install -y nodejs \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages ./packages
-COPY --from=builder /app/settings.json ./settings.json
-
-COPY docker/kasm_custom_startup.sh /dockerstartup/custom_startup.sh
-RUN chmod +x /dockerstartup/custom_startup.sh
-
-USER kasm-user
-

@@ -26,8 +26,6 @@ jobs:
             suffix: proxy
           - target: dashboard
             suffix: dashboard
-          - target: debug
-            suffix: debug
 
     steps:
       - name: Checkout
