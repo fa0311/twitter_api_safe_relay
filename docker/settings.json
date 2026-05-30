@@ -5,7 +5,7 @@
 		{
 			"name": "account1",
 			"browser": {
-				"userDataDir": "./../../user_data/account1",
+				"userDataDir": "/home/kasm-user/.config/google-chrome",
 				"headless": false,
 				"executablePath": "/opt/google/chrome/chrome",
 				"viewport": { "width": 1280, "height": 720 }
