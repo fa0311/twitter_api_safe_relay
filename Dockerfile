@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1.7-labs
 FROM node:24-bookworm AS builder
 
 WORKDIR /app
@@ -30,11 +29,13 @@ RUN pnpm --filter twitter-api-safe-proxy exec playwright install --with-deps chr
 
 WORKDIR /app/packages/server
 
-EXPOSE 3000
-
 FROM runtime AS proxy
 
 CMD ["node", "dist/server.js"]
+
+FROM runtime AS debug
+
+CMD ["node", "dist/dashboard/server.js"]
 
 
 FROM kasmweb/chrome:1.18.0 AS dashboard
@@ -66,6 +67,4 @@ USER kasm-user
 WORKDIR /twitter_api_safe_proxy/packages/server
 
 ENV VNC_PW=password
-
-# EXPOSE 3000
 

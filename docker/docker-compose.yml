@@ -1,19 +1,15 @@
 services:
-
   dashboard:
-    build:
-      context: .
-      target: debug
-    image: twitter-api-safe-dashboard
+    image: ghcr.io/fa0311/twitter_api_safe_proxy:latest-dashboard
     restart: unless-stopped
     ports:
       - "6900:3000"
       - "6901:6901"
     shm_size: "2gb"
     environment:
-      VNC_PW: "changeme" # (user: kasm_user)
+      VNC_PW: "password" # user: kasm_user
     volumes:
-      - ./settings.dashboard.json:/twitter_api_safe_proxy/settings.json:ro
+      - ./settings.json:/twitter_api_safe_proxy/settings.json:ro
       - dashboard_user_data:/twitter_api_safe_proxy/user_data
 
 volumes:
