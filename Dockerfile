@@ -35,8 +35,7 @@ CMD ["node", "dist/server.js"]
 
 FROM runtime AS debug
 
-CMD ["node", "dist/dashboard/server.js"]
-
+CMD ["node", "dist/debug/server.js"]
 
 FROM kasmweb/chrome:1.18.0 AS dashboard
 
