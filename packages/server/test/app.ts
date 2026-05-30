@@ -1,5 +1,5 @@
 import { createIntegration } from "@twitter-api-safe/test-utils";
-import { injectTwitterClient } from "twitter-api-safe-request";
+import { createTwitterClient } from "twitter-api-safe-request";
 import { afterEach, describe, expect, it } from "vitest";
 import createApp from "../src/app.js";
 import { createBrowser } from "../src/utils/browser.js";
@@ -21,7 +21,8 @@ describe("someFunction", () => {
 			viewport: undefined,
 		});
 		const page = await browser.newPage();
-		const client = await injectTwitterClient(page);
+		const client = createTwitterClient(page);
+		await client.inject();
 		await page.goto("https://x.com/home");
 
 		const app = await createApp(() => client);

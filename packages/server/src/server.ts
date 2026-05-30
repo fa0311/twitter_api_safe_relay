@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import { serve } from "@hono/node-server";
-import { injectTwitterClient } from "twitter-api-safe-request";
+import { createTwitterClient } from "twitter-api-safe-request";
 import createApp from "./app.js";
 import { createBrowser } from "./utils/browser.js";
 import { createLogger } from "./utils/logger.js";
@@ -23,7 +23,8 @@ const browser = await Promise.all(
 		});
 		logger.info(`Browser for profile "${profile.name}" launched successfully`);
 		const page = await browser.newPage();
-		const client = await injectTwitterClient(page);
+		const client = createTwitterClient(page);
+		await client.inject();
 		await page.goto(profile.home.url);
 		await client.waitStartup();
 		return client;

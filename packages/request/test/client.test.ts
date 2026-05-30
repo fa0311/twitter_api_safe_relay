@@ -1,5 +1,5 @@
 import { createIntegration } from "@twitter-api-safe/test-utils";
-import { injectTwitterClient } from "twitter-api-safe-request";
+import { createTwitterClient } from "twitter-api-safe-request";
 import { afterEach, describe, expect, it } from "vitest";
 
 describe("someFunction", () => {
@@ -11,7 +11,8 @@ describe("someFunction", () => {
 		const context = await integration.browser();
 
 		const page = await context.newPage();
-		const client = await injectTwitterClient(page);
+		const client = createTwitterClient(page);
+		await client.inject();
 		await page.goto("https://x.com/home");
 
 		const result = await client.graphQLFullResponse(

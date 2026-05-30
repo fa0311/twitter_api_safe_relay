@@ -65,18 +65,18 @@ Configure the proxy server port, log level, and browser profiles in the workspac
 
 ```json
 {
-	"port": 3000,
-	"logLevel": "info",
-	"profiles": [
-		{
-			"name": "account1",
-			"browser": {
-				"userDataDir": "./../../user_data/account1",
-				"headless": false,
-				"viewport": { "width": 720, "height": 720 }
-			}
-		}
-	]
+  "port": 3000,
+  "logLevel": "info",
+  "profiles": [
+    {
+      "name": "account1",
+      "browser": {
+        "userDataDir": "./../../user_data/account1",
+        "headless": false,
+        "viewport": { "width": 720, "height": 720 }
+      }
+    }
+  ]
 }
 ```
 
@@ -94,21 +94,22 @@ pnpm add twitter-api-safe-request playwright
 
 ```ts
 import { chromium } from "playwright";
-import { injectTwitterClient } from "twitter-api-safe-request";
+import { createTwitterClient } from "twitter-api-safe-request";
 
 const context = await chromium.launchPersistentContext("./user_data/account1", {
-	headless: false,
+  headless: false,
 });
 
 const page = await context.newPage();
-const client = await injectTwitterClient(page);
+const client = createTwitterClient(page);
+await client.inject();
 
 await page.goto("https://x.com/home");
 await client.waitStartup();
 
 const result = await client.dispatch({
-	method: "GET",
-	path: "/2/users/me",
-	params: {},
+  method: "GET",
+  path: "/2/users/me",
+  params: {},
 });
 ```

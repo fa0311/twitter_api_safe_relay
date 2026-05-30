@@ -43,6 +43,7 @@ export const createDebugApp = (clients: TwitterApiProfileClient[]) => {
 		if (currentCount === 1) {
 			await Promise.all(
 				clients.map(async (client) => {
+					await client.inject();
 					await client.enableDebug();
 					void client.debugStream.pipeTo(new WritableStream({ write: emit }));
 				}),

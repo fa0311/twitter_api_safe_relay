@@ -20,10 +20,11 @@ export type TwitterApiProfileClient = {
 	graphQLFullResponse: (
 		param: GraphQLRequest,
 		body: unknown,
-		data: unknown,
-		options: GraphQLOptions,
+		data?: unknown,
+		options?: GraphQLOptions,
 	) => Promise<unknown>;
 	dispatch: (request: unknown) => Promise<unknown>;
+	inject: () => Promise<void>;
 	debugStream: ReadableStream<unknown>;
 	enableDebug: () => Promise<void>;
 	waitStartup: () => Promise<void>;
@@ -40,8 +41,7 @@ declare global {
 
 const defaultInjectSetupScriptPath = fileURLToPath(new URL("../injects/setup.js", import.meta.url));
 
-export const injectTwitterClient = async (page: Page): Promise<TwitterApiProfileClient> => {
-	const injectSetupScript = await fs.readFile(defaultInjectSetupScriptPath, "utf-8");
+export const createTwitterClient = (page: Page): TwitterApiProfileClient => {
 	const [debugStream, debugWriter] = (() => {
 		const stream = new TransformStream<unknown, unknown>();
 		return [stream.readable, stream.writable.getWriter()];
@@ -52,16 +52,25 @@ export const injectTwitterClient = async (page: Page): Promise<TwitterApiProfile
 			debugWriter.write(entry);
 		});
 	};
-	await page.addInitScript(injectSetupScript);
 
-	const graphQL = async (param: GraphQLRequest, body: unknown, data: unknown, options: GraphQLOptions) => {
+	const inject = async () => {
+		const injectSetupScript = await fs.readFile(defaultInjectSetupScriptPath, "utf-8");
+		await page.addInitScript(injectSetupScript);
+	};
+
+	const graphQL = async (param: GraphQLRequest, body: unknown, data?: unknown, options?: GraphQLOptions) => {
 		return await page.evaluate((request) => globalThis.elonmusk_114514_request(request), {
 			property: "graphQL",
 			query: [param, body, data, options],
 		});
 	};
 
-	const graphQLFullResponse = async (param: GraphQLRequest, body: unknown, data: unknown, options: GraphQLOptions) => {
+	const graphQLFullResponse = async (
+		param: GraphQLRequest,
+		body: unknown,
+		data?: unknown,
+		options?: GraphQLOptions,
+	) => {
 		return await page.evaluate((request) => globalThis.elonmusk_114514_request(request), {
 			property: "graphQLFullResponse",
 			query: [param, body, data, options],
@@ -77,5 +86,5 @@ export const injectTwitterClient = async (page: Page): Promise<TwitterApiProfile
 
 	const waitStartup = async () => await page.evaluate(() => globalThis.elonmusk_114514_wait_startup.promise);
 
-	return { graphQL, graphQLFullResponse, dispatch, page, waitStartup, debugStream, enableDebug };
+	return { graphQL, graphQLFullResponse, dispatch, page, waitStartup, debugStream, enableDebug, inject };
 };
