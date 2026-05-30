@@ -33,6 +33,6 @@ FROM runtime AS proxy
 
 CMD ["node", "dist/server.js"]
 
-FROM runtime AS debug
+FROM runtime AS dashboard
 
 CMD ["node", "dist/debug/server.js"]
