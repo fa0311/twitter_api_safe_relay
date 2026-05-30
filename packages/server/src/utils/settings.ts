@@ -16,7 +16,9 @@ const HomeSchema = z.strictObject({
 	url: z.url().default("https://x.com/home"),
 });
 
-const BrowserSchema = z.strictObject({
+const LunchBrowserSchema = z.strictObject({
+	type: z.literal("launch"),
+	browserType: z.enum(["chromium", "firefox", "webkit"]).default("chromium"),
 	headless: z.boolean().default(false),
 	viewport: ViewportSchema.optional(),
 	proxy: ProxySchema.optional(),
@@ -26,11 +28,16 @@ const BrowserSchema = z.strictObject({
 	userDataDir: z.string(),
 });
 
+const CdpBrowserSchema = z.strictObject({
+	type: z.literal("cdp"),
+	browserType: z.enum(["chromium", "firefox", "webkit"]).default("chromium"),
+	cdpEndpoint: z.string().min(1, "CDP endpoint is required"),
+});
+
 const ProfileSchema = z.strictObject({
 	name: z.string().min(1, "Profile name is required"),
-	browserType: z.enum(["chromium", "firefox", "webkit"]).default("chromium"),
 	home: HomeSchema.default(HomeSchema.parse({})),
-	browser: BrowserSchema,
+	browser: z.discriminatedUnion("type", [LunchBrowserSchema, CdpBrowserSchema]),
 });
 
 const SettingsSchema = z.strictObject({

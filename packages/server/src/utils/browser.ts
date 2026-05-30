@@ -1,6 +1,6 @@
 import { chromium, firefox, webkit } from "playwright";
 
-type CreateBrowserSettings = {
+type LaunchBrowserSettings = {
 	browserType: "chromium" | "firefox" | "webkit";
 	userDataDir: string;
 	headless: boolean | undefined;
@@ -11,7 +11,12 @@ type CreateBrowserSettings = {
 	viewport: { width: number; height: number } | undefined;
 };
 
-export const createBrowser = async (settings: CreateBrowserSettings) => {
+type CdpBrowserSettings = {
+	browserType: "chromium" | "firefox" | "webkit";
+	cdpEndpoint: string;
+};
+
+export const launchBrowser = async (settings: LaunchBrowserSettings) => {
 	const browser = { chromium, firefox, webkit }[settings.browserType];
 	const context = await browser.launchPersistentContext(settings.userDataDir, {
 		headless: settings.headless,
@@ -21,5 +26,12 @@ export const createBrowser = async (settings: CreateBrowserSettings) => {
 		args: ["--disable-blink-features=AutomationControlled", ...(settings.args || [])],
 		viewport: settings.viewport,
 	});
+	return context;
+};
+
+export const connectBrowser = async (settings: CdpBrowserSettings) => {
+	const browser = { chromium, firefox, webkit }[settings.browserType];
+	const cdpBrowser = await browser.connectOverCDP(settings.cdpEndpoint);
+	const context = cdpBrowser.contexts()[0] ?? (await cdpBrowser.newContext());
 	return context;
 };

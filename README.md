@@ -94,14 +94,14 @@ pnpm add twitter-api-safe-request playwright
 
 ```ts
 import { chromium } from "playwright";
-import { createTwitterClient } from "twitter-api-safe-request";
+import { createTwitterBrowser } from "twitter-api-safe-request";
 
 const context = await chromium.launchPersistentContext("./user_data/account1", {
   headless: false,
 });
 
 const page = await context.newPage();
-const client = createTwitterClient(page);
+const client = createTwitterBrowser(page);
 await client.inject();
 
 await page.goto("https://x.com/home");

@@ -1,5 +1,5 @@
 import { createIntegration } from "@twitter-api-safe/test-utils";
-import { createTwitterClient } from "twitter-api-safe-request";
+import { createTwitterBrowser } from "twitter-api-safe-request";
 import { afterEach, describe, expect, it } from "vitest";
 
 describe("someFunction", () => {
@@ -11,7 +11,7 @@ describe("someFunction", () => {
 		const context = await integration.browser();
 
 		const page = await context.newPage();
-		const client = createTwitterClient(page);
+		const client = createTwitterBrowser(page);
 		await client.inject();
 		await page.goto("https://x.com/home");
 

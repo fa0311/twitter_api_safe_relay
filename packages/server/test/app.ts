@@ -1,8 +1,8 @@
 import { createIntegration } from "@twitter-api-safe/test-utils";
-import { createTwitterClient } from "twitter-api-safe-request";
+import { createTwitterBrowser } from "twitter-api-safe-request";
 import { afterEach, describe, expect, it } from "vitest";
 import createApp from "../src/app.js";
-import { createBrowser } from "../src/utils/browser.js";
+import { launchBrowser } from "../src/utils/browser.js";
 
 describe("someFunction", () => {
 	const integration = createIntegration();
@@ -10,7 +10,7 @@ describe("someFunction", () => {
 	afterEach(async () => integration.afterEachCall());
 
 	const createMockApp = async () => {
-		const browser = await createBrowser({
+		const browser = await launchBrowser({
 			browserType: "chromium",
 			userDataDir: await integration.temp(),
 			headless: true,
@@ -20,8 +20,9 @@ describe("someFunction", () => {
 			args: [],
 			viewport: undefined,
 		});
+
 		const page = await browser.newPage();
-		const client = createTwitterClient(page);
+		const client = createTwitterBrowser(page);
 		await client.inject();
 		await page.goto("https://x.com/home");
 

@@ -41,7 +41,7 @@ declare global {
 
 const defaultInjectSetupScriptPath = fileURLToPath(new URL("../injects/setup.js", import.meta.url));
 
-export const createTwitterClient = (page: Page): TwitterApiProfileClient => {
+export const createTwitterBrowser = (page: Page): TwitterApiProfileClient => {
 	const [debugStream, debugWriter] = (() => {
 		const stream = new TransformStream<unknown, unknown>();
 		return [stream.readable, stream.writable.getWriter()];
