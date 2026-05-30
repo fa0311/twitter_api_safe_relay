@@ -51,24 +51,13 @@ RUN apt-get update \
     && apt-get install -y nodejs \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /usr/share/vulkan/icd.d && \
-    printf '{"file_format_version":"1.0.0","ICD":{"library_path":"libGLX_nvidia.so.0","api_version":"1.3.277"}}' \
-    > /usr/share/vulkan/icd.d/nvidia_icd.json
-
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/settings.json ./settings.json
 
-RUN mkdir -p /twitter_api_safe_proxy/user_data \
-    && chown -R 1000:0 /twitter_api_safe_proxy
-
 COPY docker/kasm_custom_startup.sh /dockerstartup/custom_startup.sh
 RUN chmod +x /dockerstartup/custom_startup.sh
 
 USER kasm-user
-
-WORKDIR /twitter_api_safe_proxy/packages/server
-
-ENV VNC_PW=password
 
