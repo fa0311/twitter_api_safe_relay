@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { DebugEntry } from "../entryUtils";
-import { detailPayloadOf, detailTabs, labelOf } from "./detailPaneModel";
+import { detailPayloadOf, detailTabs } from "../src/components/detailPaneModel";
+import type { DebugEntry } from "../src/entryUtils";
 
 const entry = {
 	id: 1,
@@ -17,8 +17,8 @@ const entry = {
 
 describe("detail pane model", () => {
 	it("keeps the expected tab order and labels", () => {
-		expect(detailTabs).toEqual(["request", "response", "javascript"]);
-		expect(detailTabs.map(labelOf)).toEqual(["Request", "Response", "JavaScript"]);
+		expect(detailTabs.map((tab) => tab.id)).toEqual(["request", "response", "javascript"]);
+		expect(detailTabs.map((tab) => tab.label)).toEqual(["Request", "Response", "JavaScript"]);
 	});
 
 	it("returns the payload owned by the selected tab", () => {

@@ -1,0 +1,15 @@
+{
+	"port": 3000,
+	"logLevel": "info",
+	"profiles": [
+		{
+			"name": "account1",
+			"browser": {
+				"userDataDir": "./../../user_data/account1",
+				"headless": false,
+				"executablePath": "/opt/google/chrome/chrome",
+				"viewport": { "width": 1280, "height": 720 }
+			}
+		}
+	]
+}

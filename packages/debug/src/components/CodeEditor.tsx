@@ -87,11 +87,6 @@ export const CodeEditor = ({ language, onChange, readOnly, value }: CodeEditorPr
 	}, [value]);
 
 	return (
-		<div
-			className={
-				"h-full min-h-0 min-w-0 overflow-hidden rounded border border-[#d9e0ea] bg-white"
-			}
-			ref={hostRef}
-		/>
+		<div className={"h-full min-h-0 min-w-0 overflow-hidden rounded border border-[#d9e0ea] bg-white"} ref={hostRef} />
 	);
 };

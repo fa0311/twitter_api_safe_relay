@@ -1,6 +1,7 @@
 import { type DebugEntry, formatTime } from "../entryUtils";
 import { useEntrySelectionStore } from "../store";
 import { MethodBadge } from "./MethodBadge";
+import { VersionBadge } from "./VersionBadge";
 
 type Props = {
 	entries: DebugEntry[];
@@ -43,9 +44,7 @@ const EntryRow = ({ entry, newlyAdded }: EntryRowProps) => {
 		>
 			<span className="flex min-w-0 items-center gap-2">
 				<MethodBadge method={entry.method} />
-				<span className="rounded border border-[#d7dce4] bg-[#f3f5f8] px-1.5 py-0.5 font-bold text-[#536173] text-[11px]">
-					{entry.version}
-				</span>
+				<VersionBadge version={entry.version} />
 				<span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-sm">
 					{entry.label}
 				</span>

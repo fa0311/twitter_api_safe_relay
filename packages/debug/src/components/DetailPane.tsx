@@ -3,7 +3,7 @@ import { type DebugEntry, defaultScriptOf } from "../entryUtils";
 import { useDebugEntriesStore, useEntrySelectionStore } from "../store";
 import { CodeEditor } from "./CodeEditor";
 import { DetailHeader } from "./DetailHeader";
-import { type DetailTab, detailPayloadOf, detailTabs, labelOf } from "./detailPaneModel";
+import { type DetailTab, detailPayloadOf, detailTabs } from "./detailPaneModel";
 
 export const DetailPane = () => {
 	const selectedEntryId = useEntrySelectionStore((s) => s.selectedEntryId);
@@ -46,18 +46,18 @@ const SelectedDetailPane = ({ entry }: { entry: DebugEntry }) => {
 				<div className="grid h-full min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-2">
 					<div className="flex min-w-0 items-start gap-2">
 						<div className="flex min-w-0 flex-wrap items-center gap-2">
-							{detailTabs.map((nextTab) => (
+							{detailTabs.map(({ id, label }) => (
 								<button
 									className={`h-8 rounded border px-3 text-sm ${
-										tab === nextTab
+										tab === id
 											? "border-[#2563eb] bg-[#eff6ff] text-[#1d4ed8]"
 											: "border-[#cfd7e3] bg-white text-[#536173] hover:bg-[#f3f6fa]"
 									}`}
-									key={nextTab}
+									key={id}
 									type="button"
-									onClick={() => setTab(nextTab)}
+									onClick={() => setTab(id)}
 								>
-									{labelOf(nextTab)}
+									{label}
 								</button>
 							))}
 						</div>

@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { filterAndSortEntries, initialEntryFilters } from "./entryFilters";
-import type { DebugEntry } from "./entryUtils";
+import { filterAndSortEntries, initialEntryFilters } from "../src/entryFilters";
+import type { DebugEntry } from "../src/entryUtils";
 
-const makeEntry = (overrides: Partial<DebugEntry> & Pick<DebugEntry, "id" | "label" | "method" | "receivedAt" | "searchText">) =>
+const makeEntry = (
+	overrides: Partial<DebugEntry> & Pick<DebugEntry, "id" | "label" | "method" | "receivedAt" | "searchText">,
+) =>
 	({
 		path: "/2/users/me",
 		request: {},
@@ -70,11 +72,9 @@ describe("filterAndSortEntries", () => {
 		expect(filterAndSortEntries(entries, { ...initialEntryFilters, sort: "label" }).map((entry) => entry.id)).toEqual([
 			2, 1, 3,
 		]);
-		expect(filterAndSortEntries(entries, { ...initialEntryFilters, sort: "method" }).map((entry) => entry.method)).toEqual([
-			"GET",
-			"POST",
-			"POST",
-		]);
+		expect(
+			filterAndSortEntries(entries, { ...initialEntryFilters, sort: "method" }).map((entry) => entry.method),
+		).toEqual(["GET", "POST", "POST"]);
 		expect(entries.map((entry) => entry.id)).toEqual(before);
 	});
 });

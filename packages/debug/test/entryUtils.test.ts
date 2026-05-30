@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildEntry, defaultScriptOf, statsOf } from "./entryUtils";
+import { buildEntry, defaultScriptOf, statsOf } from "../src/entryUtils";
 
 const rawEvent = (request: unknown) => ({
 	receivedAt: 2_000,

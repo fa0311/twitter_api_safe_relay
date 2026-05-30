@@ -4,10 +4,11 @@
 	"description": "Safe request helpers for Twitter/X web API access through a Playwright profile.",
 	"type": "module",
 	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
+	"types": "./src/index.ts",
 	"exports": {
 		".": {
-			"types": "./dist/index.d.ts",
+			"types": "./src/index.ts",
+			"development": "./src/index.ts",
 			"import": "./dist/index.js"
 		}
 	},
@@ -16,8 +17,18 @@
 		"injects",
 		"README.md"
 	],
+	"publishConfig": {
+		"types": "./dist/index.d.ts",
+		"exports": {
+			".": {
+				"types": "./dist/index.d.ts",
+				"import": "./dist/index.js"
+			}
+		}
+	},
 	"scripts": {
 		"clean": "rimraf dist",
+		"dev": "tsc -p tsconfig.json --watch",
 		"build": "pnpm clean && tsc -p tsconfig.json",
 		"prepack": "pnpm build",
 		"test": "vitest run",

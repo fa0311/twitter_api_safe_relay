@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { filterAndSortEntries, type EntryFilters, initialEntryFilters } from "./entryFilters";
+import { type EntryFilters, filterAndSortEntries, initialEntryFilters } from "./entryFilters";
 import type { DebugEntry } from "./entryUtils";
 
 export const useEntryFilters = (entries: DebugEntry[]) => {
@@ -8,5 +8,3 @@ export const useEntryFilters = (entries: DebugEntry[]) => {
 
 	return { filters, setFilters, visibleEntries };
 };
-
-export type { EntryFilters, SortMode } from "./entryFilters";
