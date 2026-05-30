@@ -29,7 +29,6 @@ const clients = await Promise.all(
 		const page = await browser.newPage();
 		const client = createTwitterClient(page);
 		await page.goto(profile.home.url);
-		await client.waitStartup();
 		return client;
 	}),
 );
