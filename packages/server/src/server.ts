@@ -42,7 +42,22 @@ const browser = await Promise.all(
 	}),
 );
 
-const app = await createApp(() => randomChoice(browser));
+const clientMap = new Map(settings.profiles.map((profile, i) => [profile.name, browser[i]!]));
+
+const app = await createApp({
+	getClient: (profileName?: string) => {
+		if (profileName) {
+			const client = clientMap.get(profileName);
+			if (!client) {
+				return null;
+			}
+			return client;
+		}
+		return randomChoice(browser);
+	},
+	profileNames: settings.profiles.map((p) => p.name),
+});
 
 console.log(`Relay server is running on http://localhost:${settings.port}`);
+console.log(`Available profiles: ${settings.profiles.map((p) => p.name).join(", ")}`);
 serve({ fetch: app.fetch, port: settings.port });

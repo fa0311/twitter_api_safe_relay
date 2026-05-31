@@ -46,7 +46,17 @@ const clients = await Promise.all(
 	}),
 );
 
-const relayApi = await createApp(() => randomChoice(clients));
+const clientMap = new Map(settings.profiles.map((profile, i) => [profile.name, clients[i]!]));
+
+const relayApi = await createApp({
+	getClient: (profileName?: string) => {
+		if (profileName) {
+			return clientMap.get(profileName) ?? null;
+		}
+		return randomChoice(clients);
+	},
+	profileNames: settings.profiles.map((p) => p.name),
+});
 const app = new Hono();
 
 const debugApi = createDebugApp(clients);
