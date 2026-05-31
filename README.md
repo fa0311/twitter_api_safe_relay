@@ -28,9 +28,15 @@ The important part is that Node.js does not directly reimplement X's internal AP
 
 ## Setup
 
-### Docker (planned)
+### Docker
 
-TODO
+The `Dockerfile` builds three images:
+
+- **init-profile** — a one-shot job that prepares the shared browser profile volume (fixes permissions, clears stale Chrome lock files).
+- **relay** — the HTTP relay server (`dist/server.js`).
+- **dashboard** — the debug server with the web dashboard UI (`dist/debug/server.js`).
+
+See `docker/` for the Docker Compose setup.
 
 ### Local
 
@@ -71,16 +77,19 @@ Configure the relay server port, log level, and browser profiles in the workspac
     {
       "name": "account1",
       "browser": {
-        "userDataDir": "./../../user_data/account1",
-        "headless": false,
-        "viewport": { "width": 720, "height": 720 }
+        "type": "cdp",
+        "browserType": "chromium",
+        "cdpEndpoint": "http://127.0.0.1:9222"
       }
     }
   ]
 }
 ```
 
-`userDataDir` is the storage path for a Playwright persistent browser profile. On first launch, sign in to X/Twitter in the browser and keep the session saved before using the relay.
+Each profile's `browser` is one of two types:
+
+- `cdp` — connect to an already-running browser over the Chrome DevTools Protocol via `cdpEndpoint` (used by the Docker setup, which points at the kasmweb Chrome). Sign in to X/Twitter in that browser and keep the session.
+- `launch` — let Playwright launch a persistent context. Set `userDataDir` to the profile storage path; on first launch, sign in to X/Twitter in the browser and keep the session saved before using the relay.
 
 ## `twitter-api-safe-request` example
 
@@ -89,7 +98,7 @@ Configure the relay server port, log level, and browser profiles in the workspac
 https://www.npmjs.com/package/twitter-api-safe-request
 
 ```sh
-pnpm add twitter-api-safe-request playwright
+pnpm add twitter-api-safe-request
 ```
 
 ```ts
