@@ -25,11 +25,11 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/settings.json ./settings.json
 
-RUN pnpm --filter twitter-api-safe-proxy exec playwright install --with-deps chromium
+RUN pnpm --filter twitter-api-safe-relay exec playwright install --with-deps chromium
 
 WORKDIR /app/packages/server
 
-FROM runtime AS proxy
+FROM runtime AS relay
 
 CMD ["node", "dist/server.js"]
 

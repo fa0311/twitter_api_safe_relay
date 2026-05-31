@@ -22,8 +22,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - target: proxy
-            suffix: proxy
+          - target: relay
+            suffix: relay
           - target: dashboard
             suffix: dashboard
 

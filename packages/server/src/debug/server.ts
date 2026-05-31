@@ -46,12 +46,12 @@ const clients = await Promise.all(
 	}),
 );
 
-const proxyApi = await createApp(() => randomChoice(clients));
+const relayApi = await createApp(() => randomChoice(clients));
 const app = new Hono();
 
 const debugApi = createDebugApp(clients);
 app.route("/", debugApi);
-app.route("/", proxyApi);
+app.route("/", relayApi);
 app.use("/*", serveStatic({ root: "../dashboard/dist" }));
 
 console.log(`Debug server is running on http://localhost:${settings.port}`);

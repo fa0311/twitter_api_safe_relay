@@ -14,8 +14,8 @@ services:
       - dashboard_user_data:/home/kasm-user/chrome-profile
 
   dashboard:
-    image: ghcr.io/fa0311/twitter_api_safe_proxy:latest-debug
-    container_name: twitter_api_safe_proxy
+    image: ghcr.io/fa0311/twitter_api_safe_relay:latest-debug
+    container_name: twitter_api_safe_relay
     restart: unless-stopped
     network_mode: "service:kasmweb"
     volumes:

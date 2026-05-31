@@ -8,10 +8,10 @@ pnpm --filter twitter-api-safe-dashboard dev
 
 Open `http://localhost:3000`.
 
-This package only owns the Vite UI. The debug API and replay proxy live in `twitter-api-safe-proxy` under `src/debug`:
+This package only owns the Vite UI. The debug API and replay relay live in `twitter-api-safe-relay` under `src/debug`:
 
 ```sh
-pnpm --filter twitter-api-safe-proxy dev:debug
+pnpm --filter twitter-api-safe-relay dev:debug
 ```
 
 In dev mode, the UI runs on port `5173` and proxies `/api/events` plus `/i/api/graphql/*` to the debug server on port `3000`.
@@ -19,7 +19,7 @@ In dev mode, the UI runs on port `5173` and proxies `/api/events` plus `/i/api/g
 From the repository root, run these in separate terminals:
 
 ```sh
-pnpm dev:proxy:debug
+pnpm dev:relay:debug
 pnpm dev:dashboard
 ```
 

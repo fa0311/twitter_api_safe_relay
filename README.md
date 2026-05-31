@@ -1,4 +1,4 @@
-# twitter-api-safe-proxy
+# twitter-api-safe-relay
 
 A TypeScript monorepo for calling the internal Twitter/X Web App API client from a logged-in browser opened with Playwright.
 
@@ -14,7 +14,7 @@ This project finds the API client that the X/Twitter Web App uses inside the bro
 flowchart LR
 	curl["HTTP client"]
 	app["Your Node.js app"]
-	server["twitter-api-safe-proxy"]
+	server["twitter-api-safe-relay"]
 	package["twitter-api-safe-request"]
 	xclient["X Web App<br/>internal API client"]
 
@@ -52,16 +52,16 @@ Run the dashboard unit tests:
 pnpm test:dashboard
 ```
 
-The request and proxy test scripts exercise browser-backed integration flows:
+The request and relay test scripts exercise browser-backed integration flows:
 
 ```sh
 pnpm test:request
-pnpm test:proxy
+pnpm test:relay
 ```
 
 ## Configuration
 
-Configure the proxy server port, log level, and browser profiles in the workspace-level `settings.json`.
+Configure the relay server port, log level, and browser profiles in the workspace-level `settings.json`.
 
 ```json
 {
@@ -80,7 +80,7 @@ Configure the proxy server port, log level, and browser profiles in the workspac
 }
 ```
 
-`userDataDir` is the storage path for a Playwright persistent browser profile. On first launch, sign in to X/Twitter in the browser and keep the session saved before using the proxy.
+`userDataDir` is the storage path for a Playwright persistent browser profile. On first launch, sign in to X/Twitter in the browser and keep the session saved before using the relay.
 
 ## `twitter-api-safe-request` example
 

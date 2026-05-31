@@ -1,7 +1,7 @@
 {
-	"name": "twitter-api-safe-proxy",
+	"name": "twitter-api-safe-relay",
 	"version": "1.0.0",
-	"description": "HTTP proxy server for safe Twitter/X web API requests through Playwright profiles.",
+	"description": "HTTP relay server for safe Twitter/X web API requests through Playwright profiles.",
 	"type": "module",
 	"main": "dist/index.js",
 	"types": "./src/index.ts",
@@ -13,7 +13,7 @@
 		}
 	},
 	"bin": {
-		"twitter-api-safe-proxy": "dist/server.js",
+		"twitter-api-safe-relay": "dist/server.js",
 		"twitter-api-safe-debug": "dist/debug/server.js"
 	},
 	"files": [
@@ -47,7 +47,7 @@
 		"x",
 		"hono",
 		"playwright",
-		"proxy"
+		"relay"
 	],
 	"author": "",
 	"license": "MIT",
