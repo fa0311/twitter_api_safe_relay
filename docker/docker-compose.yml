@@ -1,4 +1,12 @@
 services:
+  kasmweb-init:
+    image: alpine
+    container_name: kasmweb-init
+    user: root
+    command: sh -c "chown -R 1000:0 /profile && chmod -R g+rwX /profile"
+    volumes:
+      - dashboard_user_data:/profile
+
   kasmweb:
     image: kasmweb/chrome:1.18.0
     container_name: kasmweb
@@ -12,9 +20,11 @@ services:
       APP_ARGS: "--start-maximized --user-data-dir=/home/kasm-user/chrome-profile --password-store=basic --remote-debugging-port=9222"
     volumes:
       - dashboard_user_data:/home/kasm-user/chrome-profile
+    depends_on:
+      - kasmweb-init
 
   dashboard:
-    image: ghcr.io/fa0311/twitter_api_safe_relay:latest-debug
+    image: ghcr.io/fa0311/twitter_api_safe_relay:latest-dashboard
     container_name: twitter_api_safe_relay
     restart: unless-stopped
     network_mode: "service:kasmweb"
