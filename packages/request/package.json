@@ -1,6 +1,6 @@
 {
 	"name": "twitter-api-safe-request",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "Safe request helpers for Twitter/X web API access through a Playwright profile.",
 	"type": "module",
 	"main": "dist/index.js",
@@ -30,7 +30,6 @@
 		"clean": "rimraf dist",
 		"dev": "tsc -p tsconfig.json --watch",
 		"build": "pnpm clean && tsc -p tsconfig.json",
-		"prepack": "pnpm build",
 		"test": "vitest run",
 		"type-check": "tsc -p tsconfig.json --noEmit"
 	},
