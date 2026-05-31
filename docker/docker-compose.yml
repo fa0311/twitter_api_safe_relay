@@ -1,9 +1,8 @@
 services:
-  kasmweb-init:
-    image: alpine
-    container_name: kasmweb-init
-    user: root
-    command: sh -c "chown -R 1000:0 /profile && chmod -R g+rwX /profile"
+  init-profile:
+    image: ghcr.io/fa0311/twitter_api_safe_relay:latest-init-profile
+    container_name: init_profile
+    restart: "no"
     volumes:
       - dashboard_user_data:/profile
 
@@ -21,7 +20,7 @@ services:
     volumes:
       - dashboard_user_data:/home/kasm-user/chrome-profile
     depends_on:
-      - kasmweb-init
+      - init-profile
 
   dashboard:
     image: ghcr.io/fa0311/twitter_api_safe_relay:latest-dashboard
