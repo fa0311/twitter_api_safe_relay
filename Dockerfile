@@ -36,3 +36,9 @@ CMD ["node", "dist/server.js"]
 FROM runtime AS dashboard
 
 CMD ["node", "dist/debug/server.js"]
+
+FROM alpine AS init-profile
+
+CMD rm -f /profile/Singleton* /profile/DevToolsActivePort \
+ && chown -R 1000:0 /profile \
+ && chmod -R g+rwX /profile

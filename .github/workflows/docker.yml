@@ -26,6 +26,8 @@ jobs:
             suffix: relay
           - target: dashboard
             suffix: dashboard
+          - target: init-profile
+            suffix: init-profile
 
     steps:
       - name: Checkout
