@@ -34,6 +34,10 @@ export const createDebugApp = (clients: AppOptions[]) => {
 	};
 	const count = createCounter();
 
+	app.get("/api/enable-debug", (c) => {
+		return c.json({ enabled: count.getCount() > 0 });
+	});
+
 	app.post("/api/enable-debug", async (c) => {
 		const currentCount = count.increment();
 		if (currentCount === 1) {
