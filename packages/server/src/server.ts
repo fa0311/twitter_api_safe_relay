@@ -5,12 +5,11 @@ import { createTwitterBrowser } from "twitter-api-safe-request";
 import createApp from "./app.js";
 import { connectBrowser, launchBrowser } from "./utils/browser.js";
 import { createLogger } from "./utils/logger.js";
-import { randomChoice } from "./utils/random.js";
 import { loadSettings } from "./utils/settings.js";
 
 const settings = await loadSettings(JSON.parse(await fs.readFile("./../../settings.json", "utf-8")));
 const logger = createLogger({ logLevel: settings.logLevel, logPrettyPrint: settings.logPrettyPrint });
-const browser = await Promise.all(
+const clients = await Promise.all(
 	settings.profiles.map(async (profile) => {
 		const browser = await match(profile.browser)
 			.with({ type: "launch" }, (e) => {
@@ -38,11 +37,12 @@ const browser = await Promise.all(
 		const client = createTwitterBrowser(page);
 		await client.inject();
 		await client.goto(profile.home.url);
-		return client;
+		return { name: profile.name, client };
 	}),
 );
 
-const app = await createApp(() => randomChoice(browser));
+const app = await createApp(clients);
 
 console.log(`Relay server is running on http://localhost:${settings.port}`);
+console.log(`Available profiles: ${settings.profiles.map((p) => p.name).join(", ")}`);
 serve({ fetch: app.fetch, port: settings.port });

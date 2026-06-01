@@ -7,7 +7,6 @@ import { createTwitterBrowser } from "twitter-api-safe-request";
 import createApp from "../app.js";
 import { connectBrowser, launchBrowser } from "../utils/browser.js";
 import { createLogger } from "../utils/logger.js";
-import { randomChoice } from "../utils/random.js";
 import { loadSettings } from "../utils/settings.js";
 import { createDebugApp } from "./app.js";
 
@@ -42,11 +41,11 @@ const clients = await Promise.all(
 		const client = createTwitterBrowser(page);
 		await client.inject();
 		await client.goto(profile.home.url);
-		return client;
+		return { name: profile.name, client };
 	}),
 );
 
-const relayApi = await createApp(() => randomChoice(clients));
+const relayApi = await createApp(clients);
 const app = new Hono();
 
 const debugApi = createDebugApp(clients);
