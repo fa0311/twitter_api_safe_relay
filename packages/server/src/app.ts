@@ -36,7 +36,7 @@ const createApp = async (options: AppOptions[]) => {
 			const result = await client.dispatch({
 				headers: { "content-type": "application/json" },
 				method: "GET",
-				arams: c.req.query(),
+				params: c.req.query(),
 				path: `/graphql/${queryId}/${operationName}`,
 			});
 			return c.json(result);
