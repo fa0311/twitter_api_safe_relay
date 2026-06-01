@@ -97,7 +97,7 @@ describe("buildEntry", () => {
 });
 
 describe("defaultScriptOf", () => {
-	it("creates replay script for REST GET entries", () => {
+	it("creates relay script for REST GET entries", () => {
 		const entry = buildEntry(
 			rawEvent({
 				headers: {},
@@ -115,7 +115,7 @@ describe("defaultScriptOf", () => {
 		expect(script).toContain("return await fetch(`/2/users/me?${params}`");
 	});
 
-	it("creates replay script for GraphQL POST entries", () => {
+	it("creates relay script for GraphQL POST entries", () => {
 		const entry = buildEntry(
 			rawEvent({
 				data: {

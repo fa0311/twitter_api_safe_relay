@@ -180,12 +180,12 @@ export const statsOf = (entries: DebugEntry[]): EntryStats =>
 		{ total: 0, v11: 0, v2: 0, graphql: 0 },
 	);
 
-const graphqlReplayPath = (queryId: string, operationName: string) =>
+const graphqlRelayPath = (queryId: string, operationName: string) =>
 	`/i/api/graphql/${encodeURIComponent(queryId)}/${encodeURIComponent(operationName)}`;
 
 export const defaultScriptOf = (entry: DebugEntry): string => {
 	if (entry.version === "graphql") {
-		const endpoint = graphqlReplayPath(entry.queryId, entry.operationName);
+		const endpoint = graphqlRelayPath(entry.queryId, entry.operationName);
 		const variables = JSON.stringify(entry.variables, null, "\t");
 		const features = JSON.stringify(entry.features, null, "\t");
 		const fieldToggles = JSON.stringify(entry.fieldToggles, null, "\t");

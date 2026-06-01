@@ -8,7 +8,7 @@ twitter-api-safe-relay
 
 Reads settings from `../settings.json` relative to the working directory. In this workspace, the shared default settings file lives at `packages/settings.json`.
 
-The debug API and replay relay are available as a separate entry point:
+The debug API and relay are available as a separate entry point:
 
 ```sh
 twitter-api-safe-debug

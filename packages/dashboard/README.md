@@ -8,7 +8,7 @@ pnpm --filter twitter-api-safe-dashboard dev
 
 Open `http://localhost:3000`.
 
-This package only owns the Vite UI. The debug API and replay relay live in `twitter-api-safe-relay` under `src/debug`:
+This package only owns the Vite UI. The debug API and relay live in `twitter-api-safe-relay` under `src/debug`:
 
 ```sh
 pnpm --filter twitter-api-safe-relay dev:debug
