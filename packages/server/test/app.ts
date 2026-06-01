@@ -26,10 +26,7 @@ describe("someFunction", () => {
 		await client.inject();
 		await client.goto("https://x.com/home");
 
-		const app = await createApp({
-			getClient: () => client,
-			profileNames: ["test"],
-		});
+		const app = await createApp([{ name: "mock", client }]);
 		integration.cleanup(async () => {
 			await browser.close();
 			await page.close();

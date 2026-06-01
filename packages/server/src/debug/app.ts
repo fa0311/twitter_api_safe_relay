@@ -1,9 +1,9 @@
 import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
-import type { TwitterApiProfileClient } from "twitter-api-safe-request";
+import type { AppOptions } from "../utils/app.js";
 import { createCounter } from "../utils/counter.js";
 
-export const createDebugApp = (clients: TwitterApiProfileClient[]) => {
+export const createDebugApp = (clients: AppOptions[]) => {
 	const listeners = new Set<(entry: unknown) => void>();
 	const app = new Hono();
 
@@ -38,7 +38,7 @@ export const createDebugApp = (clients: TwitterApiProfileClient[]) => {
 		const currentCount = count.increment();
 		if (currentCount === 1) {
 			await Promise.all(
-				clients.map(async (client) => {
+				clients.map(async ({ client }) => {
 					await client.inject();
 					await client.goto(client.page.url());
 					await client.enableDebug();
