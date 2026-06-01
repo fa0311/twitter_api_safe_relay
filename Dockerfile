@@ -29,6 +29,8 @@ RUN pnpm --filter twitter-api-safe-relay exec playwright install --with-deps chr
 
 WORKDIR /app/packages/server
 
+HEALTHCHECK CMD curl -f http://127.0.0.1:3000/health
+
 FROM runtime AS relay
 
 CMD ["node", "dist/server.js"]

@@ -7,6 +7,10 @@ import { randomChoice } from "./utils/random.js";
 const createApp = async (options: AppOptions[]) => {
 	const app = new Hono();
 
+	app.get("/health", (c) => {
+		return c.json({ status: "ok", profiles: options.map((o) => o.name) });
+	});
+
 	app.get("/profiles", (c) => {
 		return c.json({ profiles: options.map((o) => o.name) });
 	});
