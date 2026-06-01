@@ -1,7 +1,7 @@
 services:
   init-profile:
     image: ghcr.io/fa0311/twitter_api_safe_relay:latest-init-profile
-    container_name: init_profile
+    container_name: init-profile
     restart: "no"
     volumes:
       - dashboard_user_data:/profile
