@@ -104,10 +104,10 @@ importers:
     dependencies:
       '@hono/node-server':
         specifier: ^1.19.4
-        version: 1.19.14(hono@4.11.0)
+        version: 1.19.14(hono@4.12.25)
       hono:
-        specifier: ^4.11.0
-        version: 4.11.0
+        specifier: ^4.12.25
+        version: 4.12.25
       pino:
         specifier: ^10.1.0
         version: 10.1.0
@@ -820,8 +820,8 @@ packages:
   help-me@5.0.0:
     resolution: {integrity: sha512-7xgomUX6ADmcYzFik0HzAxh/73YlKR9bmFzf51CZwR+b6YtzU2m0u49hQCqV6SvlqIqsaxovfwdvbnsw3b/zpg==}
 
-  hono@4.11.0:
-    resolution: {integrity: sha512-Jg8uZzN2ul8/qlyid5FO8O624F3AK0wKtkgoeEON1qBum1rM1itYBxoMKu/1SPJC7F1+xlIZsJMmc4HHhJ1AWg==}
+  hono@4.12.25:
+    resolution: {integrity: sha512-2NFaIyNVgJmBs/ecmtGzlmluTFs5cHEWGTdu0t1HBwYzoGXOL5nUQBRMXsXWla5i4KkG//QMzVP88m1+I3fdAQ==}
     engines: {node: '>=16.9.0'}
 
   jiti@2.7.0:
@@ -1411,9 +1411,9 @@ snapshots:
   '@esbuild/win32-x64@0.27.1':
     optional: true
 
-  '@hono/node-server@1.19.14(hono@4.11.0)':
+  '@hono/node-server@1.19.14(hono@4.12.25)':
     dependencies:
-      hono: 4.11.0
+      hono: 4.12.25
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
@@ -1772,7 +1772,7 @@ snapshots:
 
   help-me@5.0.0: {}
 
-  hono@4.11.0: {}
+  hono@4.12.25: {}
 
   jiti@2.7.0: {}
 
