@@ -6,31 +6,33 @@ services:
     volumes:
       - dashboard_user_data:/profile
 
-  kasmweb:
+  twitter-relay-kasmweb:
     image: kasmweb/chrome:1.18.0
-    container_name: kasmweb
+    container_name: twitter-relay-kasmweb
     restart: unless-stopped
+    depends_on:
+      init-profile:
+        condition: service_completed_successfully
     ports:
       - "6901:6901"
       - "6900:3000"
-    shm_size: "4gb"
     environment:
       VNC_PW: "password" # kasm_user
       APP_ARGS: "--start-maximized --user-data-dir=/home/kasm-user/chrome-profile --password-store=basic --remote-debugging-port=9222"
     volumes:
       - dashboard_user_data:/home/kasm-user/chrome-profile
-    depends_on:
-      - init-profile
+    shm_size: "4gb"
 
-  dashboard:
+  twitter-relay-dashboard:
     image: ghcr.io/fa0311/twitter_api_safe_relay:latest-dashboard-slim
     container_name: twitter_api_safe_relay
     restart: unless-stopped
-    network_mode: "service:kasmweb"
+    depends_on:
+      twitter-relay-kasmweb:
+        condition: service_started
     volumes:
       - ./settings.json:/app/settings.json:ro
-    depends_on:
-      - kasmweb
+    network_mode: "service:twitter-relay-kasmweb"
 
 volumes:
   dashboard_user_data:
