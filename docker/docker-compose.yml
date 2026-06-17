@@ -23,7 +23,7 @@ services:
       - init-profile
 
   dashboard:
-    image: ghcr.io/fa0311/twitter_api_safe_relay:latest-dashboard
+    image: ghcr.io/fa0311/twitter_api_safe_relay:latest-dashboard-slim
     container_name: twitter_api_safe_relay
     restart: unless-stopped
     network_mode: "service:kasmweb"

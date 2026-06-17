@@ -30,13 +30,17 @@ The important part is that Node.js does not directly reimplement X's internal AP
 
 ### Docker
 
-The `Dockerfile` builds three images:
+The `Dockerfile` builds these images:
 
 - **init-profile** — a one-shot job that prepares the shared browser profile volume (fixes permissions, clears stale Chrome lock files).
-- **relay** — the HTTP relay server (`dist/server.js`).
-- **dashboard** — the debug server with the web dashboard UI (`dist/debug/server.js`).
+- **relay** — the HTTP relay server (`dist/server.js`) with Playwright's Chromium installed for `launch` profiles.
+- **dashboard** — the debug server with the web dashboard UI (`dist/debug/server.js`) with Playwright's Chromium installed for `launch` profiles.
+- **relay-slim** — the HTTP relay server without bundled browser binaries or Playwright browser system dependencies. Use this for `cdp` profiles that connect to an external browser.
+- **dashboard-slim** — the debug server without bundled browser binaries or Playwright browser system dependencies. Use this for `cdp` profiles that connect to an external browser.
+- **relay-firefox** / **dashboard-firefox** — Firefox-bundled variants for `launch` profiles with `"browserType": "firefox"`.
+- **relay-webkit** / **dashboard-webkit** — WebKit-bundled variants for `launch` profiles with `"browserType": "webkit"`.
 
-See `docker/` for the Docker Compose setup.
+See `docker/` for the Docker Compose setup. The compose example uses `dashboard-slim` because the browser runs separately in the `kasmweb` container and is reached over CDP. CDP is intended for Chromium-based browsers; use the Firefox/WebKit images with `launch` profiles.
 
 ### Local
 

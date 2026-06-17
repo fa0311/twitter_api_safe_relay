@@ -26,6 +26,18 @@ jobs:
             suffix: relay
           - target: dashboard
             suffix: dashboard
+          - target: relay-slim
+            suffix: relay-slim
+          - target: dashboard-slim
+            suffix: dashboard-slim
+          - target: relay-firefox
+            suffix: relay-firefox
+          - target: dashboard-firefox
+            suffix: dashboard-firefox
+          - target: relay-webkit
+            suffix: relay-webkit
+          - target: dashboard-webkit
+            suffix: dashboard-webkit
           - target: init-profile
             suffix: init-profile
 

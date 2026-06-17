@@ -1,6 +1,7 @@
 FROM node:24-bookworm AS builder
 
 WORKDIR /app
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 RUN corepack enable
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -11,7 +12,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm build
 
-FROM node:24-bookworm AS runtime
+FROM node:24-bookworm-slim AS runtime-base
 
 WORKDIR /app
 
@@ -25,11 +26,27 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/settings.json ./settings.json
 
-RUN pnpm --filter twitter-api-safe-relay exec playwright install --with-deps chromium
-
 WORKDIR /app/packages/server
 
 HEALTHCHECK CMD curl -f http://127.0.0.1:3000/health
+
+FROM runtime-base AS runtime
+
+WORKDIR /app
+RUN pnpm --filter twitter-api-safe-relay exec playwright install --with-deps chromium
+WORKDIR /app/packages/server
+
+FROM runtime-base AS runtime-firefox
+
+WORKDIR /app
+RUN pnpm --filter twitter-api-safe-relay exec playwright install --with-deps firefox
+WORKDIR /app/packages/server
+
+FROM runtime-base AS runtime-webkit
+
+WORKDIR /app
+RUN pnpm --filter twitter-api-safe-relay exec playwright install --with-deps webkit
+WORKDIR /app/packages/server
 
 FROM runtime AS relay
 
@@ -39,8 +56,32 @@ FROM runtime AS dashboard
 
 CMD ["node", "dist/debug/server.js"]
 
+FROM runtime-base AS relay-slim
+
+CMD ["node", "dist/server.js"]
+
+FROM runtime-base AS dashboard-slim
+
+CMD ["node", "dist/debug/server.js"]
+
+FROM runtime-firefox AS relay-firefox
+
+CMD ["node", "dist/server.js"]
+
+FROM runtime-firefox AS dashboard-firefox
+
+CMD ["node", "dist/debug/server.js"]
+
+FROM runtime-webkit AS relay-webkit
+
+CMD ["node", "dist/server.js"]
+
+FROM runtime-webkit AS dashboard-webkit
+
+CMD ["node", "dist/debug/server.js"]
+
 FROM alpine AS init-profile
 
 CMD rm -f /profile/Singleton* /profile/DevToolsActivePort \
- && chown -R 1000:0 /profile \
- && chmod -R g+rwX /profile
+    && chown -R 1000:0 /profile \
+    && chmod -R g+rwX /profile
