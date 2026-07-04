@@ -1,108 +1,40 @@
 # twitter-api-safe-relay
 
-A TypeScript monorepo for calling the internal Twitter/X Web App API client from a logged-in browser opened with Playwright.
+`twitter-api-safe-relay` is a TypeScript monorepo for sending Twitter/X Web App API requests through a logged-in browser.
 
-This is not just another Node.js HTTP client. It opens X.com in a real browser, hooks into the Web App's webpack runtime, captures the internal API client used by the page, and dispatches requests from Node.js through `page.evaluate()`.
+The workspace contains two main entry points:
 
-In other words, this project delegates requests to the logged-in browser context instead of reimplementing cookies, auth state, CSRF handling, Web App request behavior, feature flags, and other moving parts in Node.js.
+- `twitter-api-safe-request`: an npm package you can use directly from your own Playwright code.
+- `twitter-api-safe-relay`: an HTTP relay server that wraps `twitter-api-safe-request`.
 
-## What makes it different?
-
-This project finds the API client that the X/Twitter Web App uses inside the browser, hooks into it, and lets that client perform requests on your behalf.
+The core idea is simple: X.com already has an authenticated Web App API client running in the browser. This project injects a small bridge into that page and lets requests run through that live client instead of reimplementing cookies, CSRF handling, auth state, feature flags, and request behavior in Node.js.
 
 ```mermaid
 flowchart LR
-	curl["HTTP client"]
 	app["Your Node.js app"]
+	curl["HTTP client"]
 	server["twitter-api-safe-relay"]
 	package["twitter-api-safe-request"]
 	xclient["X Web App<br/>internal API client"]
 
-	app -->|"call function"|package
-	curl -->|"HTTP request"| server
-	server -->|"call function"| package
-	package -->|"injected bridge"| xclient
+	app -->|"call package"|package
+	curl -->|"HTTP request"|server
+	server -->|"call package"|package
+	package -->|"browser bridge"|xclient
 ```
 
-The important part is that Node.js does not directly reimplement X's internal API behavior. Instead, requests are routed through the client extracted from the live X Web App, so they run in the same browser environment as the Web App itself.
+## Use the package directly
 
-## Setup
-
-### Docker
-
-The `Dockerfile` builds these images:
-
-- **init-profile** — a one-shot job that prepares the shared browser profile volume (fixes permissions, clears stale Chrome lock files).
-- **relay** — the HTTP relay server (`dist/server.js`) with Playwright's Chromium installed for `launch` profiles.
-- **dashboard** — the debug server with the web dashboard UI (`dist/debug/server.js`) with Playwright's Chromium installed for `launch` profiles.
-- **relay-slim** — the HTTP relay server without bundled browser binaries or Playwright browser system dependencies. Use this for `cdp` profiles that connect to an external browser.
-- **dashboard-slim** — the debug server without bundled browser binaries or Playwright browser system dependencies. Use this for `cdp` profiles that connect to an external browser.
-- **relay-firefox** / **dashboard-firefox** — Firefox-bundled variants for `launch` profiles with `"browserType": "firefox"`.
-- **relay-webkit** / **dashboard-webkit** — WebKit-bundled variants for `launch` profiles with `"browserType": "webkit"`.
-
-See `docker/` for the Docker Compose setup. The compose example uses `dashboard-slim` because the browser runs separately in the `kasmweb` container and is reached over CDP. CDP is intended for Chromium-based browsers; use the Firefox/WebKit images with `launch` profiles.
-
-### Local
+Use `twitter-api-safe-request` when you already have a Playwright browser/page and do not need an HTTP server.
 
 ```sh
-pnpm install
+pnpm add twitter-api-safe-request playwright
 ```
 
-Install Playwright browsers if needed.
+If needed:
 
 ```sh
 pnpm exec playwright install
-```
-
-## Tests
-
-Run the dashboard unit tests:
-
-```sh
-pnpm test:dashboard
-```
-
-The request and relay test scripts exercise browser-backed integration flows:
-
-```sh
-pnpm test:request
-pnpm test:relay
-```
-
-## Configuration
-
-Configure the relay server port, log level, and browser profiles in the workspace-level `settings.json`.
-
-```json
-{
-  "port": 3000,
-  "logLevel": "info",
-  "profiles": [
-    {
-      "name": "account1",
-      "browser": {
-        "type": "cdp",
-        "browserType": "chromium",
-        "cdpEndpoint": "http://127.0.0.1:9222"
-      }
-    }
-  ]
-}
-```
-
-Each profile's `browser` is one of two types:
-
-- `cdp` — connect to an already-running browser over the Chrome DevTools Protocol via `cdpEndpoint` (used by the Docker setup, which points at the kasmweb Chrome). Sign in to X/Twitter in that browser and keep the session.
-- `launch` — let Playwright launch a persistent context. Set `userDataDir` to the profile storage path; on first launch, sign in to X/Twitter in the browser and keep the session saved before using the relay.
-
-## `twitter-api-safe-request` example
-
-`twitter-api-safe-request` is published on npm:
-
-https://www.npmjs.com/package/twitter-api-safe-request
-
-```sh
-pnpm add twitter-api-safe-request
 ```
 
 ```ts
@@ -115,8 +47,8 @@ const context = await chromium.launchPersistentContext("./user_data/account1", {
 
 const page = await context.newPage();
 const client = createTwitterBrowser(page);
-await client.inject();
 
+await client.inject();
 await client.goto("https://x.com/home");
 
 const result = await client.dispatch({
@@ -124,4 +56,95 @@ const result = await client.dispatch({
   path: "/2/users/me",
   params: {},
 });
+```
+
+Package README: [`packages/request/README.md`](packages/request/README.md)
+
+npm package page: [`twitter-api-safe-request`](https://www.npmjs.com/package/twitter-api-safe-request)
+
+## Use the HTTP relay
+
+Use `twitter-api-safe-relay` when another process should call the X Web App API over HTTP.
+
+Once the relay is running, replace the X.com origin with the relay origin and keep the path/query/body shape:
+
+You do not need to provide Cookie, CSRF, or x-client-transaction-id yourself; the relay adds those headers automatically.
+
+```txt
+https://x.com/i/api/graphql/{queryId}/{operationName}?...
+http://localhost:3000/i/api/graphql/{queryId}/{operationName}?...
+```
+
+For example:
+
+```sh
+curl 'http://localhost:3000/i/api/graphql/gKia-nBM9kwuDEfSDeWMfQ/HomeTimeline'
+```
+
+Server README: [`packages/server/README.md`](packages/server/README.md)
+
+## Configuration
+
+Configure the relay in the workspace-level `settings.json`.
+
+```json
+{
+  "port": 3000,
+  "logLevel": "info",
+  "profiles": [
+    {
+      "name": "account1",
+      "browser": {
+        "type": "launch",
+        "userDataDir": "./../../user_data/account1",
+        "headless": false
+      }
+    }
+  ]
+}
+```
+
+Each profile uses either:
+
+- `launch`: Playwright opens a persistent browser profile. Sign in to X/Twitter on first launch.
+- `cdp`: the relay connects to an already-running Chromium browser over the Chrome DevTools Protocol.
+
+## Docker
+
+The compose example in [`docker/`](docker/) runs the debug dashboard with an external Chromium browser over CDP.
+
+```sh
+docker compose -f docker/docker-compose.yml up
+```
+
+Open the browser UI at `http://localhost:6901`, sign in to X/Twitter, then call the relay or dashboard on `http://localhost:6900`.
+
+Use `slim` tags when connecting to an external browser over CDP; use browser-specific tags when the container should launch that browser itself.
+
+## Local development
+
+```sh
+pnpm install
+pnpm build
+pnpm dev:relay
+```
+
+For the debug dashboard:
+
+```sh
+pnpm dev:relay:debug
+```
+
+If you use a `launch` profile and do not already have the browser installed:
+
+```sh
+pnpm exec playwright install chromium
+```
+
+## Tests
+
+```sh
+pnpm test:dashboard
+pnpm test:request
+pnpm test:relay
 ```
