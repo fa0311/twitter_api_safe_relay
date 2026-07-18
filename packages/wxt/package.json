@@ -14,12 +14,12 @@
 		".": {
 			"types": "./src/index.ts",
 			"development": "./src/index.ts",
-			"import": "./dist/index.js"
+			"import": "./src/index.ts"
 		},
 		"./module": {
 			"types": "./src/module.ts",
 			"development": "./src/module.ts",
-			"import": "./dist/module.js"
+			"import": "./src/module.ts"
 		}
 	},
 	"files": [
