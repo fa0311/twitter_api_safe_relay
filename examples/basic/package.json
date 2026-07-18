@@ -1,5 +1,5 @@
 {
-	"name": "@twitter-api-safe/example-basic",
+	"name": "twitter-api-safe-example-basic",
 	"version": "0.0.0",
 	"private": true,
 	"type": "module",

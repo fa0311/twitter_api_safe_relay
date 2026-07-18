@@ -1,4 +1,4 @@
-import { createIntegration } from "@twitter-api-safe/test-utils";
+import { createIntegration } from "twitter-api-safe-test-utils";
 import { createHookManager, createTwitterBrowser } from "twitter-api-safe-request";
 import { afterEach, describe, expect, it } from "vitest";
 

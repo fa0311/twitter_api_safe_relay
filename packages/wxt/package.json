@@ -2,6 +2,11 @@
 	"name": "twitter-api-safe-wxt",
 	"version": "0.0.1",
 	"description": "Minimal WXT bridge for the Twitter/X Web App API client.",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/fa0311/twitter_api_safe_proxy.git",
+		"directory": "packages/wxt"
+	},
 	"type": "module",
 	"main": "dist/index.js",
 	"types": "./src/index.ts",
@@ -38,7 +43,8 @@
 	"scripts": {
 		"build": "rimraf dist && tsc -p tsconfig.build.json",
 		"clean": "rimraf dist",
-		"type-check": "tsc -p tsconfig.json --noEmit"
+		"type-check": "tsc -p tsconfig.json --noEmit",
+		"verify": "pnpm exec biome lint . && pnpm type-check && pnpm build"
 	},
 	"keywords": [
 		"twitter",

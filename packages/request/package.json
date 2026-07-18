@@ -1,7 +1,12 @@
 {
 	"name": "twitter-api-safe-request",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "Safe request helpers for Twitter/X web API access through a Playwright profile.",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/fa0311/twitter_api_safe_proxy.git",
+		"directory": "packages/request"
+	},
 	"type": "module",
 	"main": "dist/index.js",
 	"types": "./src/index.ts",
@@ -17,6 +22,7 @@
 		"README.md"
 	],
 	"publishConfig": {
+		"access": "public",
 		"types": "./dist/index.d.ts",
 		"exports": {
 			".": {
@@ -30,7 +36,8 @@
 		"dev": "tsc -p tsconfig.json --watch",
 		"build": "pnpm clean && tsc -p tsconfig.json",
 		"test": "vitest run",
-		"type-check": "tsc -p tsconfig.json --noEmit"
+		"type-check": "tsc -p tsconfig.json --noEmit",
+		"verify": "pnpm exec biome lint . && pnpm type-check && pnpm test && pnpm build"
 	},
 	"keywords": [
 		"twitter",
@@ -47,7 +54,7 @@
 		"twitter-api-safe-inject": "workspace:*"
 	},
 	"devDependencies": {
-		"@twitter-api-safe/test-utils": "workspace:*",
+		"twitter-api-safe-test-utils": "workspace:*",
 		"@types/node": "^25.0.2",
 		"playwright": "^1.60.0",
 		"rimraf": "^6.1.3",

@@ -62,7 +62,7 @@
 		"zod": "^4.1.13"
 	},
 	"devDependencies": {
-		"@twitter-api-safe/test-utils": "workspace:*",
+		"twitter-api-safe-test-utils": "workspace:*",
 		"@types/node": "^25.0.2",
 		"rimraf": "^6.1.3",
 		"tsx": "^4.21.0",
