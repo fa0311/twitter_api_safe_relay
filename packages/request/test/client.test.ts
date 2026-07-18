@@ -1,5 +1,5 @@
-import { createIntegration } from "@twitter-api-safe/test-utils";
-import { createTwitterBrowser } from "twitter-api-safe-request";
+import { createIntegration } from "twitter-api-safe-test-utils";
+import { createHookManager, createTwitterBrowser } from "twitter-api-safe-request";
 import { afterEach, describe, expect, it } from "vitest";
 
 describe("someFunction", () => {
@@ -7,12 +7,58 @@ describe("someFunction", () => {
 
 	afterEach(async () => integration.afterEachCall());
 
+	it("runs hooks by priority and removes hooks", async () => {
+		const hooks = createHookManager();
+		const calls: string[] = [];
+		const entry = { request: {}, response: {}, requestAt: 0, receivedAt: 0 };
+
+		hooks.addHook(
+			"low",
+			() => {
+				calls.push("low");
+			},
+			{
+				priority: 1,
+			},
+		);
+		hooks.addHook(
+			"high",
+			() => {
+				calls.push("high");
+			},
+			{
+				priority: 10,
+			},
+		);
+
+		await hooks.runHooks(entry);
+		expect(calls).toEqual(["high", "low"]);
+
+		hooks.removeHook("high");
+		calls.length = 0;
+		await hooks.runHooks(entry);
+		expect(calls).toEqual(["low"]);
+	});
+
 	it("runs graphQLFullResponse through a persistent X profile", async () => {
 		const context = await integration.browser();
 
 		const page = await context.newPage();
 		const client = createTwitterBrowser(page);
 		await client.inject();
+		await client.goto("https://x.com/home");
+		let resolveDebugEntry: (entry: { response: unknown }) => void;
+		const debugEntryPromise = new Promise<{ response: unknown }>((resolve) => {
+			resolveDebugEntry = resolve;
+		});
+		const hooks = createHookManager();
+		hooks.addHook("test:debug", (entry) => {
+			const request = entry.request as { path?: unknown };
+			if (typeof request.path === "string" && request.path.includes("/TweetResultByRestId")) {
+				resolveDebugEntry(entry);
+			}
+		});
+		await client.initHook(hooks.runHooks);
 		await client.goto("https://x.com/home");
 
 		const result = await client.graphQLFullResponse(
@@ -81,6 +127,12 @@ describe("someFunction", () => {
 		);
 
 		const text = (result as any).data.tweetResult.result.legacy.full_text;
+		const debugEntry = await debugEntryPromise;
+		const debugText = (debugEntry.response as any).data.tweetResult.result.legacy.full_text;
+		expect(debugText).toBe(text);
+		hooks.removeHook("test:debug");
+		hooks.addHook("test:readded", () => undefined);
+		hooks.removeHook("test:readded");
 
 		expect(text).toContain("Hey you …");
 	}, 120_000);

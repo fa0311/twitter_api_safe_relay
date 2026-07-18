@@ -1,0 +1,40 @@
+{
+	"name": "twitter-api-safe-inject",
+	"version": "0.0.1",
+	"description": "Injectable MAIN-world setup script for discovering the Twitter/X Web App API client.",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/fa0311/twitter_api_safe_proxy.git",
+		"directory": "packages/inject"
+	},
+	"type": "module",
+	"types": "./types.d.ts",
+	"exports": {
+		".": {
+			"types": "./types.d.ts"
+		},
+		"./types": {
+			"types": "./types.d.ts"
+		},
+		"./setup.js": "./setup.js"
+	},
+	"files": [
+		"setup.js",
+		"types.d.ts",
+		"README.md"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"verify": "pnpm exec biome lint . && node --check setup.js"
+	},
+	"keywords": [
+		"twitter",
+		"x",
+		"browser-extension",
+		"playwright",
+		"api"
+	],
+	"license": "MIT"
+}

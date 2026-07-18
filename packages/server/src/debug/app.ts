@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
+import { createHookManager } from "twitter-api-safe-request";
 import type { AppOptions } from "../utils/app.js";
 import { createCounter } from "../utils/counter.js";
 
@@ -45,8 +46,11 @@ export const createDebugApp = (clients: AppOptions[]) => {
 				clients.map(async ({ client }) => {
 					await client.inject();
 					await client.goto(client.page.url());
-					await client.enableDebug();
-					void client.debugStream.pipeTo(new WritableStream({ write: emit }));
+					const hooks = createHookManager();
+					hooks.addHook("twitter-api-safe-dashboard:debug", (entry) => {
+						emit(entry);
+					});
+					await client.initHook(hooks.runHooks);
 				}),
 			);
 

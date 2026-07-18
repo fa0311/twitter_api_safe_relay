@@ -1,5 +1,5 @@
 {
-	"name": "@twitter-api-safe/test-utils",
+	"name": "twitter-api-safe-test-utils",
 	"version": "0.0.0",
 	"private": true,
 	"type": "module",

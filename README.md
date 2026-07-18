@@ -1,10 +1,12 @@
-# twitter-api-safe-relay
+# twitter-api-safe
 
-`twitter-api-safe-relay` is a TypeScript monorepo for sending Twitter/X Web App API requests through a logged-in browser.
+`twitter-api-safe` is a TypeScript monorepo for sending Twitter/X Web App API requests through a logged-in browser.
 
-The workspace contains two main entry points:
+The workspace contains four main entry points:
 
+- `twitter-api-safe-inject`: the canonical MAIN-world `setup.js` asset shared by Playwright and browser extensions.
 - `twitter-api-safe-request`: an npm package you can use directly from your own Playwright code.
+- `twitter-api-safe-wxt`: a WXT adapter for browser extensions.
 - `twitter-api-safe-relay`: an HTTP relay server that wraps `twitter-api-safe-request`.
 
 The core idea is simple: X.com already has an authenticated Web App API client running in the browser. This project injects a small bridge into that page and lets requests run through that live client instead of reimplementing cookies, CSRF handling, auth state, feature flags, and request behavior in Node.js.
@@ -12,15 +14,19 @@ The core idea is simple: X.com already has an authenticated Web App API client r
 ```mermaid
 flowchart LR
 	app["Your Node.js app"]
+	extension["WXT browser extension"]
 	curl["HTTP client"]
 	server["twitter-api-safe-relay"]
 	package["twitter-api-safe-request"]
+	wxt["twitter-api-safe-wxt"]
 	xclient["X Web App<br/>internal API client"]
 
 	app -->|"call package"|package
+	extension -->|"call package"|wxt
 	curl -->|"HTTP request"|server
 	server -->|"call package"|package
 	package -->|"browser bridge"|xclient
+	wxt -->|"MAIN world bridge"|xclient
 ```
 
 ## Use the package directly
@@ -61,6 +67,43 @@ const result = await client.dispatch({
 Package README: [`packages/request/README.md`](packages/request/README.md)
 
 npm package page: [`twitter-api-safe-request`](https://www.npmjs.com/package/twitter-api-safe-request)
+
+## Use from a WXT browser extension
+
+Add the module to `wxt.config.ts`:
+
+```ts
+export default defineConfig({
+  modules: ["twitter-api-safe-wxt/module"],
+});
+```
+
+Create the browser client from a `document_start` content script:
+
+```ts
+import { createTwitterBrowser, TWITTER_MATCHES } from "twitter-api-safe-wxt";
+
+export default defineContentScript({
+  matches: [...TWITTER_MATCHES],
+  runAt: "document_start",
+  allFrames: false,
+  async main(ctx) {
+    const client = createTwitterBrowser(ctx);
+    await client.inject();
+    await client.waitStartup();
+    const result = await client.dispatch({
+      method: "GET",
+      path: "/2/example",
+      params: {},
+    });
+    console.log(result);
+  },
+});
+```
+
+Package README: [`packages/wxt/README.md`](packages/wxt/README.md)
+
+Runnable example: [`examples/basic`](examples/basic)
 
 ## Use the HTTP relay
 

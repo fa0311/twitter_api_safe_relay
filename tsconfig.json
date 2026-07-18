@@ -38,5 +38,10 @@
 		"skipLibCheck": true
 	},
 	"files": [],
-	"references": [{ "path": "./packages/request" }, { "path": "./packages/dashboard" }, { "path": "./packages/server" }]
+	"references": [
+		{ "path": "./packages/request" },
+		{ "path": "./packages/dashboard" },
+		{ "path": "./packages/server" },
+		{ "path": "./packages/wxt" }
+	]
 }
