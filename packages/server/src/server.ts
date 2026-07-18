@@ -37,6 +37,19 @@ const clients = await Promise.all(
 		const client = createTwitterBrowser(page);
 		await client.inject();
 		await client.goto(profile.home.url);
+		if (profile.pageReloadIntervalMinutes) {
+			const call = async () => {
+				logger.info(`Reloading page for profile "${profile.name}"`);
+				await client.page.reload();
+			};
+			setInterval(call, profile.pageReloadIntervalMinutes * 60_000);
+		}
+		page.on("crash", async () => {
+			logger.error(`Page for profile "${profile.name}" has crashed. Attempting to reload...`);
+			await client.page.reload().catch((error) => {
+				logger.error(`Failed to reload page for profile "${profile.name}" after crash: ${error.message}`);
+			});
+		});
 		return { name: profile.name, client };
 	}),
 );

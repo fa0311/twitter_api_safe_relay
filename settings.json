@@ -4,6 +4,7 @@
 	"profiles": [
 		{
 			"name": "account1",
+			"pageReloadIntervalMinutes": 1,
 			"browser": {
 				"type": "launch",
 				"userDataDir": "./../../user_data/account1",

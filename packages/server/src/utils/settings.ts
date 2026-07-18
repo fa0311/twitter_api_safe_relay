@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+const MAX_TIMER_INTERVAL_MINUTES = Math.floor((2 ** 31 - 1) / 60_000);
+
 const ViewportSchema = z.strictObject({
 	width: z.number().int().positive().default(1280),
 	height: z.number().int().positive().default(720),
@@ -37,6 +39,7 @@ const CdpBrowserSchema = z.strictObject({
 const ProfileSchema = z.strictObject({
 	name: z.string().min(1, "Profile name is required"),
 	home: HomeSchema.default(HomeSchema.parse({})),
+	pageReloadIntervalMinutes: z.number().int().min(1).max(MAX_TIMER_INTERVAL_MINUTES).optional(),
 	browser: z.discriminatedUnion("type", [LunchBrowserSchema, CdpBrowserSchema]),
 });
 

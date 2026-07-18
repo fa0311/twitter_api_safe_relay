@@ -1,6 +1,9 @@
 // ref: https://github.com/tsukumijima/KonomiTV/blob/master/server/static/zendriver_setup.js
 
 (async () => {
+	if (globalThis.elonmusk_114514_wait_startup) {
+		return;
+	}
 	globalThis.elonmusk_114514_wait_startup = (() => {
 		let resolveStartup;
 		return {
@@ -93,15 +96,14 @@
 										const requestAt = Date.now();
 										const result = await target.prototype.dispatch.apply(instance, args);
 										const receivedAt = Date.now();
-										if (globalThis.elonmusk_114514_emit_debug) {
+										if (globalThis.elonmusk_114514_hook) {
 											const data = {
 												request: args[0],
 												response: result,
 												requestAt,
 												receivedAt,
 											};
-											globalThis.elonmusk_114514_emit_debug(data);
-											console.log(data);
+											return ((await globalThis.elonmusk_114514_hook(data)) ?? data).response;
 										}
 										return result;
 									};

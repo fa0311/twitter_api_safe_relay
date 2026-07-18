@@ -14,7 +14,6 @@
 	},
 	"files": [
 		"dist",
-		"injects",
 		"README.md"
 	],
 	"publishConfig": {
@@ -43,6 +42,9 @@
 	"license": "MIT",
 	"peerDependencies": {
 		"playwright": ">=1.60.0 <2"
+	},
+	"dependencies": {
+		"twitter-api-safe-inject": "workspace:*"
 	},
 	"devDependencies": {
 		"@twitter-api-safe/test-utils": "workspace:*",
