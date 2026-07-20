@@ -126,6 +126,16 @@ curl 'http://localhost:3000/i/api/graphql/gKia-nBM9kwuDEfSDeWMfQ/HomeTimeline'
 
 Server README: [`packages/server/README.md`](packages/server/README.md)
 
+## Use from AI agents (Agent Skills)
+
+[`twitter_api_safe_relay_skills`](https://github.com/fa0311/twitter_api_safe_relay_skills) provides Agent Skills for Claude Code and other agents, letting an AI turn natural-language instructions into relay-server GraphQL / v1.1 calls and summarize the results.
+
+```sh
+npx skills add fa0311/twitter_api_safe_relay_skills
+```
+
+Start the relay server, then point the skill at it with the `TWITTER_RELAY_BASE_URL` environment variable. The agent only sees the operation catalog — it never touches cookies, CSRF tokens, or other credentials directly.
+
 ## Configuration
 
 Configure the relay in the workspace-level `settings.json`.
