@@ -1,11 +1,12 @@
-import fs from "node:fs/promises";
+#!/usr/bin/env node
+
 import { serve } from "@hono/node-server";
 import createApp from "./app.js";
+import { loadCliSettings } from "./utils/cli.js";
 import { createLogger } from "./utils/logger.js";
 import { createProfileClients } from "./utils/profiles.js";
-import { loadSettings } from "./utils/settings.js";
 
-const settings = await loadSettings(JSON.parse(await fs.readFile("./../../settings.json", "utf-8")));
+const settings = await loadCliSettings();
 const logger = createLogger({ logLevel: settings.logLevel, logPrettyPrint: settings.logPrettyPrint });
 
 const clients = await Promise.all(

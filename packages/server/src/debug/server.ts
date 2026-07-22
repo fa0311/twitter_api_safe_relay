@@ -1,14 +1,16 @@
-import fs from "node:fs/promises";
+#!/usr/bin/env node
+
+import { fileURLToPath } from "node:url";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import createApp from "../app.js";
+import { loadCliSettings } from "../utils/cli.js";
 import { createLogger } from "../utils/logger.js";
 import { createProfileClients } from "../utils/profiles.js";
-import { loadSettings } from "../utils/settings.js";
 import { createDebugApp } from "./app.js";
 
-const settings = await loadSettings(JSON.parse(await fs.readFile("./../../settings.json", "utf-8")));
+const settings = await loadCliSettings();
 const logger = createLogger({ logLevel: settings.logLevel, logPrettyPrint: settings.logPrettyPrint });
 
 const clients = await Promise.all(
@@ -38,7 +40,10 @@ const app = new Hono();
 const debugApi = createDebugApp(clients);
 app.route("/", debugApi);
 app.route("/", relayApi);
-app.use("/*", serveStatic({ root: "../dashboard/dist" }));
+app.use(
+	"/*",
+	serveStatic({ root: fileURLToPath(new URL("../../../dashboard/dist/", import.meta.url)) }),
+);
 
 console.log(`Debug server is running on http://localhost:${settings.port}`);
 
