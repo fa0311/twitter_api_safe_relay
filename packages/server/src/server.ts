@@ -1,58 +1,31 @@
 import fs from "node:fs/promises";
 import { serve } from "@hono/node-server";
-import { match } from "ts-pattern";
-import { createTwitterBrowser } from "twitter-api-safe-request";
 import createApp from "./app.js";
-import { connectBrowser, launchBrowser } from "./utils/browser.js";
 import { createLogger } from "./utils/logger.js";
+import { createProfileClients } from "./utils/profiles.js";
 import { loadSettings } from "./utils/settings.js";
 
 const settings = await loadSettings(JSON.parse(await fs.readFile("./../../settings.json", "utf-8")));
 const logger = createLogger({ logLevel: settings.logLevel, logPrettyPrint: settings.logPrettyPrint });
-const clients = await Promise.all(
-	settings.profiles.map(async (profile) => {
-		const browser = await match(profile.browser)
-			.with({ type: "launch" }, (e) => {
-				return launchBrowser({
-					browserType: e.browserType,
-					userDataDir: e.userDataDir,
-					headless: e.headless,
-					executablePath: e.executablePath,
-					env: e.env,
-					proxy: e.proxy,
-					args: e.args,
-					viewport: e.viewport,
-				});
-			})
-			.with({ type: "cdp" }, (e) => {
-				return connectBrowser({
-					browserType: e.browserType,
-					cdpEndpoint: e.cdpEndpoint,
-				});
-			})
-			.exhaustive();
-
-		logger.info(`Browser for profile "${profile.name}" launched successfully`);
-		const page = await browser.newPage();
-		const client = createTwitterBrowser(page);
-		await client.inject();
-		await client.goto(profile.home.url);
-		if (profile.pageReloadIntervalMinutes) {
-			const call = async () => {
-				logger.info(`Reloading page for profile "${profile.name}"`);
-				await client.page.reload();
-			};
-			setInterval(call, profile.pageReloadIntervalMinutes * 60_000);
-		}
-		page.on("crash", async () => {
-			logger.error(`Page for profile "${profile.name}" has crashed. Attempting to reload...`);
-			await client.page.reload().catch((error) => {
-				logger.error(`Failed to reload page for profile "${profile.name}" after crash: ${error.message}`);
-			});
+const profileClients = await createProfileClients(settings.profiles, (profile) => {
+	logger.info(`Browser for profile "${profile.name}" launched successfully`);
+});
+const clients = profileClients.map(({ profile, client }) => {
+	if (profile.pageReloadIntervalMinutes) {
+		const call = async () => {
+			logger.info(`Reloading page for profile "${profile.name}"`);
+			await client.page.reload();
+		};
+		setInterval(call, profile.pageReloadIntervalMinutes * 60_000);
+	}
+	client.page.on("crash", async () => {
+		logger.error(`Page for profile "${profile.name}" has crashed. Attempting to reload...`);
+		await client.page.reload().catch((error) => {
+			logger.error(`Failed to reload page for profile "${profile.name}" after crash: ${error.message}`);
 		});
-		return { name: profile.name, client };
-	}),
-);
+	});
+	return { name: profile.name, client };
+});
 
 const app = await createApp(clients);
 
