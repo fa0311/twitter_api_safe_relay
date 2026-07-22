@@ -2,6 +2,7 @@ import { chromium, firefox, webkit } from "playwright";
 
 type LaunchBrowserSettings = {
 	browserType: "chromium" | "firefox" | "webkit";
+	channel: string | undefined;
 	userDataDir: string;
 	headless: boolean | undefined;
 	executablePath: string | undefined;
@@ -20,6 +21,7 @@ export const launchBrowser = async (settings: LaunchBrowserSettings) => {
 	const browser = { chromium, firefox, webkit }[settings.browserType];
 	const context = await browser.launchPersistentContext(settings.userDataDir, {
 		headless: settings.headless,
+		channel: settings.channel,
 		executablePath: settings.executablePath,
 		env: settings.env,
 		proxy: settings.proxy,

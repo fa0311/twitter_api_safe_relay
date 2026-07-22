@@ -21,6 +21,7 @@ const HomeSchema = z.strictObject({
 const LunchBrowserSchema = z.strictObject({
 	type: z.literal("launch"),
 	browserType: z.enum(["chromium", "firefox", "webkit"]).default("chromium"),
+	channel: z.string().min(1).optional(),
 	headless: z.boolean().default(false),
 	viewport: ViewportSchema.optional(),
 	proxy: ProxySchema.optional(),

@@ -19,6 +19,7 @@ describe("someFunction", () => {
 			proxy: undefined,
 			args: [],
 			viewport: undefined,
+			channel: undefined,
 		});
 
 		const page = await browser.newPage();

@@ -18,6 +18,7 @@ const connectProfileBrowser = async (profile: Profile) => {
 		.with({ type: "launch" }, (settings) =>
 			launchBrowser({
 				browserType: settings.browserType,
+				channel: settings.channel,
 				userDataDir: settings.userDataDir,
 				headless: settings.headless,
 				executablePath: settings.executablePath,
