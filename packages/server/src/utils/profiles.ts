@@ -48,7 +48,9 @@ export const createProfileClients = async (profile: Profile) => {
 	if (profile.pageReloadIntervalMinutes) {
 		const call = async () => {
 			emitter.emit("reload", { profileName: profile.name });
-			await client.page.reload();
+			await client.page.reload().catch((error) => {
+				emitter.emit("error", { profileName: profile.name, error });
+			});
 		};
 		setInterval(call, profile.pageReloadIntervalMinutes * 60_000);
 	}
