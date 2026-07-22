@@ -31,14 +31,9 @@
 	},
 	"scripts": {
 		"clean": "rimraf dist",
-		"predev": "pnpm --filter twitter-api-safe-request build",
-		"dev": "tsx watch src/server.ts",
-		"dev:debug": "tsx watch src/debug/server.ts",
 		"prebuild": "pnpm --filter twitter-api-safe-request build",
 		"build": "pnpm clean && tsc -p tsconfig.json",
 		"prepack": "pnpm build",
-		"start": "node dist/server.js",
-		"start:debug": "node dist/debug/server.js",
 		"test": "vitest run",
 		"type-check": "tsc -p tsconfig.json --noEmit"
 	},
@@ -65,7 +60,6 @@
 		"twitter-api-safe-test-utils": "workspace:*",
 		"@types/node": "^25.0.2",
 		"rimraf": "^6.1.3",
-		"tsx": "^4.21.0",
 		"typescript": "^5.9.3",
 		"vitest": "^4.1.5"
 	}

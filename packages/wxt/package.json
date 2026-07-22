@@ -42,7 +42,6 @@
 	},
 	"scripts": {
 		"build": "rimraf dist && tsc -p tsconfig.build.json",
-		"clean": "rimraf dist",
 		"type-check": "tsc -p tsconfig.json --noEmit",
 		"verify": "pnpm exec biome lint . && pnpm type-check && pnpm build"
 	},

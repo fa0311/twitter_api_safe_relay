@@ -155,9 +155,6 @@ importers:
       rimraf:
         specifier: ^6.1.3
         version: 6.1.3
-      tsx:
-        specifier: ^4.21.0
-        version: 4.21.0
       twitter-api-safe-test-utils:
         specifier: workspace:*
         version: link:../test-utils
