@@ -1,5 +1,5 @@
-import { createIntegration } from "twitter-api-safe-test-utils";
 import { createTwitterBrowser } from "twitter-api-safe-request";
+import { createIntegration } from "twitter-api-safe-test-utils";
 import { afterEach, describe, expect, it } from "vitest";
 import createApp from "../src/app.js";
 import { launchBrowser } from "../src/utils/browser.js";
@@ -10,7 +10,7 @@ describe("someFunction", () => {
 	afterEach(async () => integration.afterEachCall());
 
 	const createMockApp = async () => {
-		const browser = await launchBrowser({
+		const [browser, close] = await launchBrowser({
 			browserType: "chromium",
 			userDataDir: await integration.temp(),
 			headless: true,
@@ -28,8 +28,7 @@ describe("someFunction", () => {
 
 		const app = await createApp([{ name: "mock", client }]);
 		integration.cleanup(async () => {
-			await browser.close();
-			await page.close();
+			await close();
 		});
 		return app;
 	};

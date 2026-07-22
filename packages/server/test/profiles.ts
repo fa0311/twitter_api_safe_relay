@@ -31,7 +31,7 @@ const createProfile = (name: string, url = "https://x.com/home"): Profile => ({
 	},
 });
 
-const createPage = (url: string) => ({ url: vi.fn(() => url) }) as unknown as Page;
+const createPage = (url: string) => ({ url: vi.fn(() => url), on: vi.fn() }) as unknown as Page;
 
 const createContext = (pages: Page[], newPage: Page) =>
 	({
@@ -50,60 +50,36 @@ describe("createProfileClients", () => {
 		vi.clearAllMocks();
 	});
 
-	it("reuses an existing page for the profile home origin", async () => {
-		const blankPage = createPage("about:blank");
+	it("reuses an existing page", async () => {
 		const xPage = createPage("https://x.com/notifications");
 		const newPage = createPage("about:blank");
-		const context = createContext([blankPage, xPage], newPage);
+		const context = createContext([xPage], newPage);
 		const client = createClient(xPage);
-		mocks.connectBrowser.mockResolvedValue(context);
+		const close = vi.fn();
+		mocks.connectBrowser.mockResolvedValue([context, close]);
 		mocks.createTwitterBrowser.mockReturnValue(client);
 
-		const result = await createProfileClients([createProfile("account1")]);
+		const result = await createProfileClients(createProfile("account1"));
 
 		expect(context.newPage).not.toHaveBeenCalled();
 		expect(mocks.createTwitterBrowser).toHaveBeenCalledWith(xPage);
 		expect(client.inject).toHaveBeenCalledOnce();
 		expect(client.goto).toHaveBeenCalledWith("https://x.com/home");
-		expect(client.inject.mock.invocationCallOrder[0]).toBeLessThan(client.goto.mock.invocationCallOrder[0]);
-		expect(result).toEqual([{ profile: createProfile("account1"), client }]);
+		expect(client.inject.mock.invocationCallOrder[0]!).toBeLessThan(client.goto.mock.invocationCallOrder[0]!);
+		expect(result.client).toBe(client);
+		expect(result.close).toBe(close);
 	});
 
-	it("creates a page when the context has no page for the home origin", async () => {
-		const blankPage = createPage("about:blank");
+	it("creates a page when the context has no page", async () => {
 		const newPage = createPage("about:blank");
-		const context = createContext([blankPage], newPage);
+		const context = createContext([], newPage);
 		const client = createClient(newPage);
-		mocks.connectBrowser.mockResolvedValue(context);
+		mocks.connectBrowser.mockResolvedValue([context, vi.fn()]);
 		mocks.createTwitterBrowser.mockReturnValue(client);
 
-		await createProfileClients([createProfile("account1")]);
+		await createProfileClients(createProfile("account1"));
 
 		expect(context.newPage).toHaveBeenCalledOnce();
 		expect(mocks.createTwitterBrowser).toHaveBeenCalledWith(newPage);
-	});
-
-	it("does not initialize pages until every browser is connected", async () => {
-		const goodNewPage = createPage("about:blank");
-		const goodContext = createContext([], goodNewPage);
-		let rejectBadConnection: (error: Error) => void = () => undefined;
-		const badConnection = new Promise<BrowserContext>((_resolve, reject) => {
-			rejectBadConnection = reject;
-		});
-		mocks.connectBrowser.mockImplementation(({ cdpEndpoint }: { cdpEndpoint: string }) =>
-			cdpEndpoint.includes("account1") ? Promise.resolve(goodContext) : badConnection,
-		);
-
-		const startup = createProfileClients([createProfile("account1"), createProfile("account2")]);
-		const rejection = expect(startup).rejects.toThrow("account2 connection failed");
-		await vi.waitFor(() => expect(mocks.connectBrowser).toHaveBeenCalledTimes(2));
-		await Promise.resolve();
-
-		expect(goodContext.pages).not.toHaveBeenCalled();
-		expect(goodContext.newPage).not.toHaveBeenCalled();
-
-		rejectBadConnection(new Error("account2 connection failed"));
-		await rejection;
-		expect(mocks.createTwitterBrowser).not.toHaveBeenCalled();
 	});
 });
