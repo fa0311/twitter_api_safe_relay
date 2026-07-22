@@ -4,6 +4,7 @@ import createApp from "./app.js";
 import { createLogger } from "./utils/logger.js";
 import { createProfileClients } from "./utils/profiles.js";
 import { loadSettings } from "./utils/settings.js";
+import { registerGracefulShutdown } from "./utils/shutdown.js";
 
 const settings = await loadSettings(JSON.parse(await fs.readFile("./../../settings.json", "utf-8")));
 const logger = createLogger({ logLevel: settings.logLevel, logPrettyPrint: settings.logPrettyPrint });
@@ -31,4 +32,8 @@ const app = await createApp(clients);
 
 console.log(`Relay server is running on http://localhost:${settings.port}`);
 console.log(`Available profiles: ${settings.profiles.map((p) => p.name).join(", ")}`);
-serve({ fetch: app.fetch, port: settings.port });
+const server = serve({ fetch: app.fetch, port: settings.port });
+registerGracefulShutdown(
+	server,
+	clients.map(({ client }) => client),
+);

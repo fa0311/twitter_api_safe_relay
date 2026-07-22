@@ -6,6 +6,7 @@ import createApp from "../app.js";
 import { createLogger } from "../utils/logger.js";
 import { createProfileClients } from "../utils/profiles.js";
 import { loadSettings } from "../utils/settings.js";
+import { registerGracefulShutdown } from "../utils/shutdown.js";
 import { createDebugApp } from "./app.js";
 
 const settings = await loadSettings(JSON.parse(await fs.readFile("./../../settings.json", "utf-8")));
@@ -25,4 +26,8 @@ app.route("/", relayApi);
 app.use("/*", serveStatic({ root: "../dashboard/dist" }));
 
 console.log(`Debug server is running on http://localhost:${settings.port}`);
-serve({ fetch: app.fetch, port: settings.port });
+const server = serve({ fetch: app.fetch, port: settings.port });
+registerGracefulShutdown(
+	server,
+	clients.map(({ client }) => client),
+);
