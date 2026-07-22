@@ -1,12 +1,20 @@
+import { EventEmitter } from "node:events";
 import { match } from "ts-pattern";
 import { createTwitterBrowser } from "twitter-api-safe-request";
+
 import { connectBrowser, launchBrowser } from "./browser.js";
 import type { Settings } from "./settings.js";
 
+type ProfileEvents = {
+	reload: [event: { profileName: string }];
+	crash: [event: { profileName: string }];
+	error: [event: { profileName: string; error: unknown }];
+};
+
 type Profile = Settings["profiles"][number];
 
-const connectProfileBrowser = (profile: Profile) =>
-	match(profile.browser)
+const connectProfileBrowser = async (profile: Profile) => {
+	return match(profile.browser)
 		.with({ type: "launch" }, (settings) =>
 			launchBrowser({
 				browserType: settings.browserType,
@@ -26,36 +34,30 @@ const connectProfileBrowser = (profile: Profile) =>
 			}),
 		)
 		.exhaustive();
-
-const hasOrigin = (url: string, origin: string) => {
-	try {
-		return new URL(url).origin === origin;
-	} catch {
-		return false;
-	}
 };
 
-export const createProfileClients = async (
-	profiles: Settings["profiles"],
-	onBrowserConnected?: (profile: Profile) => void,
-) => {
-	const connectedProfiles = await Promise.all(
-		profiles.map(async (profile) => {
-			const context = await connectProfileBrowser(profile);
-			onBrowserConnected?.(profile);
-			return { profile, context };
-		}),
-	);
+export const createProfileClients = async (profile: Profile) => {
+	const emitter = new EventEmitter<ProfileEvents>();
 
-	return Promise.all(
-		connectedProfiles.map(async ({ profile, context }) => {
-			const homeOrigin = new URL(profile.home.url).origin;
-			const page =
-				context.pages().find((candidate) => hasOrigin(candidate.url(), homeOrigin)) ?? (await context.newPage());
-			const client = createTwitterBrowser(page);
-			await client.inject();
-			await client.goto(profile.home.url);
-			return { profile, client };
-		}),
-	);
+	const [context, close] = await connectProfileBrowser(profile);
+	const page = context.pages()[0] ?? (await context.newPage());
+	const client = createTwitterBrowser(page);
+	await client.inject();
+	await client.goto(profile.home.url);
+
+	if (profile.pageReloadIntervalMinutes) {
+		const call = async () => {
+			emitter.emit("reload", { profileName: profile.name });
+			await client.page.reload();
+		};
+		setInterval(call, profile.pageReloadIntervalMinutes * 60_000);
+	}
+	client.page.on("crash", async () => {
+		emitter.emit("crash", { profileName: profile.name });
+		await client.page.reload().catch((error) => {
+			emitter.emit("error", { profileName: profile.name, error });
+		});
+	});
+
+	return { client, close, emitter };
 };

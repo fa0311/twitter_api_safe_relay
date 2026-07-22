@@ -26,12 +26,15 @@ export const launchBrowser = async (settings: LaunchBrowserSettings) => {
 		args: ["--disable-blink-features=AutomationControlled", ...(settings.args || [])],
 		viewport: settings.viewport,
 	});
-	return context;
+	return [context, () => context.close()] as const;
 };
 
 export const connectBrowser = async (settings: CdpBrowserSettings) => {
 	const browser = { chromium, firefox, webkit }[settings.browserType];
 	const cdpBrowser = await browser.connectOverCDP(settings.cdpEndpoint);
-	const context = cdpBrowser.contexts()[0] ?? (await cdpBrowser.newContext());
-	return context;
+	const [context] = cdpBrowser.contexts();
+	if (!context) {
+		throw new Error("No context found in the connected browser");
+	}
+	return [context, () => cdpBrowser.close()] as const;
 };
