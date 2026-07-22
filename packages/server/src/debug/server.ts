@@ -2,11 +2,9 @@ import fs from "node:fs/promises";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
-import { match } from "ts-pattern";
-import { createTwitterBrowser } from "twitter-api-safe-request";
 import createApp from "../app.js";
-import { connectBrowser, launchBrowser } from "../utils/browser.js";
 import { createLogger } from "../utils/logger.js";
+import { createProfileClients } from "../utils/profiles.js";
 import { loadSettings } from "../utils/settings.js";
 import { createDebugApp } from "./app.js";
 
@@ -15,32 +13,21 @@ const logger = createLogger({ logLevel: settings.logLevel, logPrettyPrint: setti
 
 const clients = await Promise.all(
 	settings.profiles.map(async (profile) => {
-		const browser = await match(profile.browser)
-			.with({ type: "launch" }, (e) => {
-				return launchBrowser({
-					browserType: e.browserType,
-					userDataDir: e.userDataDir,
-					headless: e.headless,
-					executablePath: e.executablePath,
-					env: e.env,
-					proxy: e.proxy,
-					args: e.args,
-					viewport: e.viewport,
-				});
-			})
-			.with({ type: "cdp" }, (e) => {
-				return connectBrowser({
-					browserType: e.browserType,
-					cdpEndpoint: e.cdpEndpoint,
-				});
-			})
-			.exhaustive();
-
+		const { client, emitter, close } = await createProfileClients(profile);
 		logger.info(`Browser for profile "${profile.name}" launched successfully`);
-		const page = await browser.newPage();
-		const client = createTwitterBrowser(page);
-		await client.inject();
-		await client.goto(profile.home.url);
+		emitter.on("reload", ({ profileName }) => {
+			logger.info(`Page reloaded for profile "${profileName}"`);
+		});
+		emitter.on("crash", ({ profileName }) => {
+			logger.error(`Page crashed for profile "${profileName}"`);
+		});
+		emitter.on("error", ({ profileName, error }) => {
+			logger.error(`Error occurred for profile "${profileName}": ${error}`);
+		});
+
+		process.on("SIGTERM", () => close());
+		process.on("SIGINT", () => close());
+
 		return { name: profile.name, client };
 	}),
 );
@@ -54,4 +41,8 @@ app.route("/", relayApi);
 app.use("/*", serveStatic({ root: "../dashboard/dist" }));
 
 console.log(`Debug server is running on http://localhost:${settings.port}`);
-serve({ fetch: app.fetch, port: settings.port });
+
+const server = serve({ fetch: app.fetch, port: settings.port });
+
+process.on("SIGTERM", () => server.close());
+process.on("SIGINT", () => server.close());
