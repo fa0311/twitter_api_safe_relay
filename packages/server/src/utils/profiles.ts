@@ -2,8 +2,8 @@ import { EventEmitter } from "node:events";
 import { match } from "ts-pattern";
 import { createTwitterBrowser } from "twitter-api-safe-request";
 
-import { connectBrowser, launchBrowser } from "./browser.js";
-import type { Settings } from "./settings.js";
+import { connectBrowser, launchBrowser } from "./browser.ts";
+import type { Settings } from "./settings.ts";
 
 type ProfileEvents = {
 	reload: [event: { profileName: string }];

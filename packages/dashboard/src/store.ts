@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { buildEntry, type DebugEntry } from "./entryUtils";
+import { buildEntry, type DebugEntry } from "./entryUtils.ts";
 
 export type DebugMode = "unknown" | "enabling" | "enabled" | "error";
 

@@ -1,8 +1,8 @@
 import type { Context } from "hono";
 import { Hono } from "hono";
 import type { TwitterApiProfileClient } from "twitter-api-safe-request";
-import type { AppOptions } from "./utils/app.js";
-import { randomChoice } from "./utils/random.js";
+import type { AppOptions } from "./utils/app.ts";
+import { randomChoice } from "./utils/random.ts";
 
 const createApp = async (options: AppOptions[]) => {
 	const app = new Hono();

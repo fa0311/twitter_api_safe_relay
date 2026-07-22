@@ -1,4 +1,5 @@
 import pino from "pino";
+import pinoPretty from "pino-pretty";
 
 type LoggerSettings = {
 	logLevel: string;
@@ -6,9 +7,9 @@ type LoggerSettings = {
 };
 
 export const createLogger = (settings: LoggerSettings) => {
-	return pino({
-		transport: settings.logPrettyPrint ? { target: "pino-pretty" } : undefined,
+	const options = {
 		level: settings.logLevel,
 		timestamp: pino.stdTimeFunctions.isoTime,
-	});
+	};
+	return settings.logPrettyPrint ? pino(options, pinoPretty()) : pino(options);
 };

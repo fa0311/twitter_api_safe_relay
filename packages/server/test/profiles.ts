@@ -1,6 +1,6 @@
 import type { BrowserContext, Page } from "playwright";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Settings } from "../src/utils/settings.js";
+import type { Settings } from "../src/utils/settings.ts";
 
 const mocks = vi.hoisted(() => ({
 	connectBrowser: vi.fn(),
@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
 	launchBrowser: vi.fn(),
 }));
 
-vi.mock("../src/utils/browser.js", () => ({
+vi.mock("../src/utils/browser.ts", () => ({
 	connectBrowser: mocks.connectBrowser,
 	launchBrowser: mocks.launchBrowser,
 }));
@@ -17,7 +17,7 @@ vi.mock("twitter-api-safe-request", () => ({
 	createTwitterBrowser: mocks.createTwitterBrowser,
 }));
 
-import { createProfileClients } from "../src/utils/profiles.js";
+import { createProfileClients } from "../src/utils/profiles.ts";
 
 type Profile = Settings["profiles"][number];
 

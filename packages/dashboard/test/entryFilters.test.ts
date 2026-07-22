@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { filterAndSortEntries, initialEntryFilters } from "../src/entryFilters";
-import type { DebugEntry } from "../src/entryUtils";
+import { filterAndSortEntries, initialEntryFilters } from "../src/entryFilters.ts";
+import type { DebugEntry } from "../src/entryUtils.ts";
 
 const makeEntry = (
 	overrides: Partial<DebugEntry> & Pick<DebugEntry, "id" | "label" | "method" | "receivedAt" | "searchText">,

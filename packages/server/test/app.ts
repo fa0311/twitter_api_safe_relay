@@ -1,8 +1,8 @@
 import { createTwitterBrowser } from "twitter-api-safe-request";
 import { createIntegration } from "twitter-api-safe-test-utils";
 import { afterEach, describe, expect, it } from "vitest";
-import createApp from "../src/app.js";
-import { launchBrowser } from "../src/utils/browser.js";
+import createApp from "../src/app.ts";
+import { launchBrowser } from "../src/utils/browser.ts";
 
 describe("someFunction", () => {
 	const integration = createIntegration();

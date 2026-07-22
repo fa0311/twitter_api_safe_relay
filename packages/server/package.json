@@ -2,6 +2,11 @@
 	"name": "twitter-api-safe-relay",
 	"version": "1.0.0",
 	"description": "HTTP relay server for safe Twitter/X web API requests through Playwright profiles.",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/fa0311/twitter_api_safe_relay.git",
+		"directory": "packages/server"
+	},
 	"type": "module",
 	"main": "dist/index.js",
 	"types": "./src/index.ts",
@@ -13,8 +18,7 @@
 		}
 	},
 	"bin": {
-		"twitter-api-safe-relay": "dist/server.js",
-		"twitter-api-safe-debug": "dist/debug/server.js"
+		"twitter-api-safe-relay": "dist/server.js"
 	},
 	"files": [
 		"dist",
@@ -35,7 +39,8 @@
 		"build": "pnpm clean && tsc -p tsconfig.json",
 		"prepack": "pnpm build",
 		"test": "vitest run",
-		"type-check": "tsc -p tsconfig.json --noEmit"
+		"type-check": "tsc -p tsconfig.json --noEmit",
+		"verify": "pnpm exec biome lint . && pnpm type-check && pnpm build"
 	},
 	"keywords": [
 		"twitter",

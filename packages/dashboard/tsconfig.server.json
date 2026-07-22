@@ -1,0 +1,10 @@
+{
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"rootDir": "server",
+		"outDir": "server-dist",
+		"tsBuildInfoFile": "server-dist/tsconfig.tsbuildinfo"
+	},
+	"include": ["server/**/*"],
+	"exclude": ["node_modules", "dist", "server-dist"]
+}

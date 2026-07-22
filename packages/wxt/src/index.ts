@@ -6,8 +6,8 @@ import type {
 } from "twitter-api-safe-inject/types";
 import type { ContentScriptContext } from "wxt/utils/content-script-context";
 import { injectScript, type ScriptPublicPath } from "wxt/utils/inject-script";
-import type { Command } from "./command.js";
-import { createHandler } from "./protocol.js";
+import type { Command } from "./command.ts";
+import { createHandler } from "./protocol.ts";
 
 export type {
 	GraphQLOptions,

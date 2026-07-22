@@ -1,11 +1,11 @@
 import { useMemo } from "react";
-import { statsOf } from "../entryUtils";
-import { useDebugEntriesStore } from "../store";
-import { useEntryFilters } from "../useEntryFilters";
-import { useNewEntryIds } from "../useNewEntryIds";
-import { EntryList } from "./EntryList";
-import { EntryStatsBar } from "./EntryStatsBar";
-import { EntryToolbar } from "./EntryToolbar";
+import { statsOf } from "../entryUtils.ts";
+import { useDebugEntriesStore } from "../store.ts";
+import { useEntryFilters } from "../useEntryFilters.ts";
+import { useNewEntryIds } from "../useNewEntryIds.ts";
+import { EntryList } from "./EntryList.tsx";
+import { EntryStatsBar } from "./EntryStatsBar.tsx";
+import { EntryToolbar } from "./EntryToolbar.tsx";
 
 export const EntrySidebar = () => {
 	const entries = useDebugEntriesStore((s) => s.entries);

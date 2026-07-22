@@ -44,7 +44,7 @@ jobs:
         run: pnpm type-check
 
       - name: Run dashboard tests
-        run: pnpm --filter twitter-api-safe-dashboard test
+        run: pnpm --filter twitter-api-safe-relay-dashboard test
 
       - name: Install Playwright browsers
         run: pnpm --filter twitter-api-safe-relay exec playwright install --with-deps chromium

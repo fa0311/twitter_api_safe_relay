@@ -6,11 +6,8 @@
 	"type": "module",
 	"scripts": {
 		"build": "pnpm -r run build",
-		"predev:relay": "pnpm --filter twitter-api-safe-request build",
-		"dev:relay": "tsx watch packages/server/src/server.ts",
-		"predev:relay:debug": "pnpm --filter twitter-api-safe-request build",
-		"dev:relay:debug": "tsx watch packages/server/src/debug/server.ts",
-		"dev:dashboard": "pnpm --filter twitter-api-safe-dashboard dev",
+		"predev:relay": "pnpm --filter twitter-api-safe-relay build",
+		"dev:relay": "concurrently --kill-others --names server,ui \"node --watch --conditions=development packages/dashboard/server/server.ts\" \"pnpm --filter twitter-api-safe-relay-dashboard dev\"",
 		"dev:wxt": "pnpm --filter twitter-api-safe-example-basic dev",
 		"test": "pnpm -r run test",
 		"type-check": "pnpm -r run type-check",
@@ -27,7 +24,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.16",
 		"@types/node": "^25.0.2",
-		"tsx": "^4.21.0",
+		"concurrently": "^10.0.3",
 		"typescript": "^5.9.3"
 	},
 	"packageManager": "pnpm@11.5.0"

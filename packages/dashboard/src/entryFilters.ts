@@ -1,4 +1,4 @@
-import { type DebugEntry, dedupeLatestByPath, type MethodFilter, type VersionFilter } from "./entryUtils";
+import { type DebugEntry, dedupeLatestByPath, type MethodFilter, type VersionFilter } from "./entryUtils.ts";
 
 export type SortMode = "newest" | "oldest" | "label" | "method";
 

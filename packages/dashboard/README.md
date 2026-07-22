@@ -1,30 +1,19 @@
-# twitter-api-safe-dashboard
+# twitter-api-safe-relay-dashboard
 
-Vite dashboard UI for inspecting Twitter/X web API requests captured through `twitter-api-safe-request`.
+Dashboard server and Vite UI for inspecting Twitter/X web API requests.
 
-```sh
-pnpm --filter twitter-api-safe-dashboard dev
-```
-
-Open `http://localhost:3000`.
-
-This package only owns the Vite UI. The debug API and relay live in `twitter-api-safe-relay` under `src/debug`:
+Place `settings.json` in the current working directory, then run:
 
 ```sh
-pnpm --filter twitter-api-safe-relay dev:debug
+pnpx twitter-api-safe-relay-dashboard
 ```
 
-In dev mode, the UI runs on port `5173` and proxies `/api/events` plus `/i/api/graphql/*` to the debug server on port `3000`.
+The package includes the built UI, dashboard API, and relay server.
 
-From the repository root, run these in separate terminals:
+For workspace development, run:
 
 ```sh
-pnpm dev:relay:debug
-pnpm dev:dashboard
+pnpm dev:relay
 ```
 
-Run the dashboard unit tests:
-
-```sh
-pnpm test:dashboard
-```
+The Vite UI runs on port `5173` and proxies API requests to the dashboard server on port `3000`.

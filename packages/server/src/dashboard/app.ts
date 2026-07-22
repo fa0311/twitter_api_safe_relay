@@ -1,10 +1,10 @@
 import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
 import { createHookManager } from "twitter-api-safe-request";
-import type { AppOptions } from "../utils/app.js";
-import { createCounter } from "../utils/counter.js";
+import type { AppOptions } from "../utils/app.ts";
+import { createCounter } from "../utils/counter.ts";
 
-export const createDebugApp = (clients: AppOptions[]) => {
+export const createDashboardApp = (clients: AppOptions[]) => {
 	const listeners = new Set<(entry: unknown) => void>();
 	const app = new Hono();
 
@@ -55,9 +55,8 @@ export const createDebugApp = (clients: AppOptions[]) => {
 			);
 
 			return c.json({ success: true, message: "Debug mode enabled" });
-		} else {
-			return c.json({ success: false, message: "Debug mode is already enabled" });
 		}
+		return c.json({ success: false, message: "Debug mode is already enabled" });
 	});
 	return app;
 };

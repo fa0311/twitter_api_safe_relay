@@ -27,6 +27,10 @@ jobs:
             path: packages/request
           - package: twitter-api-safe-wxt
             path: packages/wxt
+          - package: twitter-api-safe-relay
+            path: packages/server
+          - package: twitter-api-safe-relay-dashboard
+            path: packages/dashboard
 
     permissions:
       contents: read

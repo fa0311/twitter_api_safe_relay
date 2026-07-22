@@ -1,6 +1,6 @@
-import type { DebugEntry } from "../entryUtils";
-import { MethodBadge } from "./MethodBadge";
-import { VersionBadge } from "./VersionBadge";
+import type { DebugEntry } from "../entryUtils.ts";
+import { MethodBadge } from "./MethodBadge.tsx";
+import { VersionBadge } from "./VersionBadge.tsx";
 
 export const DetailHeader = ({ entry }: { entry: DebugEntry }) => {
 	return (
