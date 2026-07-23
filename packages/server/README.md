@@ -3,10 +3,10 @@
 HTTP relay server for safe Twitter/X web API requests through Playwright profiles.
 
 ```sh
-pnpx twitter-api-safe-relay
+pnpx twitter-api-safe-relay [settings-file]
 ```
 
-Reads `./settings.json` from the current working directory:
+Reads the settings file (JSON or JSONC; comments and trailing commas are allowed) given as the first argument. Without an argument, an interactive prompt asks which browser to launch:
 
 ```json
 {

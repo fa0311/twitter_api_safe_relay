@@ -1,23 +1,58 @@
+import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
+import { select } from "@inquirer/prompts";
+import { type ParseError, parse, printParseErrorCode } from "jsonc-parser";
+import { chromium, firefox, webkit } from "playwright";
 import { loadSettings } from "./settings.ts";
 
-const SAMPLE_SETTINGS = `{
-	"profiles": [
-		{
-			"name": "account1",
-			"browser": {
-				"type": "launch",
-				"userDataDir": "./user_data/account1"
-			}
-		}
-	]
-}`;
+type BrowserChoice = {
+	type: "launch" | "system";
+	browserType: "chromium" | "firefox" | "webkit";
+	channel?: "chrome";
+};
 
-export const loadCliSettings = async () => {
-	const raw = await fs.readFile("./settings.json", "utf-8").catch(() => {
-		console.error("settings.json not found in the current working directory. Create one like:");
-		console.error(SAMPLE_SETTINGS);
-		return process.exit(1);
+const BROWSER_CHOICES: { name: string; value: BrowserChoice }[] = [
+	{ name: "Chrome (System)", value: { type: "system", browserType: "chromium", channel: "chrome" } },
+	{ name: "Chromium (Playwright)", value: { type: "launch", browserType: "chromium" } },
+	{ name: "Firefox (Playwright)", value: { type: "launch", browserType: "firefox" } },
+	{ name: "WebKit (Playwright)", value: { type: "launch", browserType: "webkit" } },
+];
+
+export const loadCliSettings = async (file: string) => {
+	const raw = await fs.readFile(file, "utf-8");
+	const errors: ParseError[] = [];
+	const data = parse(raw, errors, { allowTrailingComma: true });
+	if (errors.length > 0) {
+		throw new AggregateError(
+			errors.map((e) => new Error(`Failed to parse ${file}: ${printParseErrorCode(e.error)} at offset ${e.offset}`)),
+			`Failed to parse ${file}`,
+		);
+	}
+	return loadSettings(data);
+};
+
+export const createDefaultSettings = async () => {
+	const browser = await select({ message: "Select the browser to launch", choices: BROWSER_CHOICES });
+	if (browser.type === "launch") {
+		const installed = existsSync({ chromium, firefox, webkit }[browser.browserType].executablePath());
+		if (!installed) {
+			throw new Error(
+				`The selected browser is not installed. Install it with: pnpx playwright install --with-deps ${browser.browserType}`,
+			);
+		}
+	}
+
+	return loadSettings({
+		profiles: [
+			{
+				name: "user",
+				browser: {
+					type: "launch",
+					browserType: browser.browserType,
+					channel: browser.channel,
+					userDataDir: "./user_data",
+				},
+			},
+		],
 	});
-	return loadSettings(JSON.parse(raw));
 };

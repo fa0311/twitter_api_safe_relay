@@ -2,11 +2,11 @@
 
 Dashboard server and Vite UI for inspecting Twitter/X web API requests.
 
-Place `settings.json` in the current working directory, then run:
-
 ```sh
-pnpx twitter-api-safe-relay-dashboard
+pnpx twitter-api-safe-relay-dashboard [settings-file]
 ```
+
+Pass a settings file (JSON or JSONC) as the first argument. Without an argument, an interactive prompt asks which browser to launch.
 
 ```json
 {

@@ -33,13 +33,13 @@ const LunchBrowserSchema = z.strictObject({
 
 const CdpBrowserSchema = z.strictObject({
 	type: z.literal("cdp"),
-	browserType: z.enum(["chromium", "firefox", "webkit"]).default("chromium"),
+	browserType: z.enum(["chromium"]).default("chromium"),
 	cdpEndpoint: z.string().min(1, "CDP endpoint is required"),
 });
 
 const ProfileSchema = z.strictObject({
 	name: z.string().min(1, "Profile name is required"),
-	home: HomeSchema.default(HomeSchema.parse({})),
+	home: HomeSchema.prefault({}),
 	pageReloadIntervalMinutes: z.number().int().min(1).max(MAX_TIMER_INTERVAL_MINUTES).optional(),
 	browser: z.discriminatedUnion("type", [LunchBrowserSchema, CdpBrowserSchema]),
 });
