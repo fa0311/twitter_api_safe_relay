@@ -1,12 +1,13 @@
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
-import { select } from "@inquirer/prompts";
+import { input, select } from "@inquirer/prompts";
 import { type ParseError, parse, printParseErrorCode } from "jsonc-parser";
 import { chromium, firefox, webkit } from "playwright";
+import { CommandExecutionRequiredError } from "./error.ts";
 import { loadSettings } from "./settings.ts";
 
 type BrowserChoice = {
-	type: "launch" | "system";
+	type: "launch" | "system" | "manual";
 	browserType: "chromium" | "firefox" | "webkit";
 	channel?: "chrome";
 };
@@ -16,6 +17,7 @@ const BROWSER_CHOICES: { name: string; value: BrowserChoice }[] = [
 	{ name: "Chromium (Playwright)", value: { type: "launch", browserType: "chromium" } },
 	{ name: "Firefox (Playwright)", value: { type: "launch", browserType: "firefox" } },
 	{ name: "WebKit (Playwright)", value: { type: "launch", browserType: "webkit" } },
+	{ name: "Chromium (Manual Input)", value: { type: "manual", browserType: "chromium" } },
 ];
 
 export const loadCliSettings = async (file: string) => {
@@ -36,11 +38,21 @@ export const createDefaultSettings = async () => {
 	if (browser.type === "launch") {
 		const installed = existsSync({ chromium, firefox, webkit }[browser.browserType].executablePath());
 		if (!installed) {
-			throw new Error(
-				`The selected browser is not installed. Install it with: pnpx playwright install --with-deps ${browser.browserType}`,
+			throw new CommandExecutionRequiredError(
+				`The selected browser is not installed. Install it with:`,
+				`pnpx playwright install --with-deps ${browser.browserType}`,
 			);
 		}
 	}
+
+	const executablePath = await (async () => {
+		if (browser.type === "manual") {
+			return await input({
+				message: "Path to the browser executable",
+				validate: (value) => existsSync(value) || "File not found",
+			});
+		}
+	})();
 
 	return loadSettings({
 		profiles: [
@@ -50,6 +62,7 @@ export const createDefaultSettings = async () => {
 					type: "launch",
 					browserType: browser.browserType,
 					channel: browser.channel,
+					executablePath: executablePath,
 					userDataDir: "./user_data",
 				},
 			},

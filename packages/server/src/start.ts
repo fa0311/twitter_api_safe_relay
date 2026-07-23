@@ -1,6 +1,7 @@
 import { serve } from "@hono/node-server";
 import type { Hono } from "hono";
 import type { AppOptions } from "./utils/app.ts";
+import { createCleanup } from "./utils/cleanup.ts";
 import { createDefaultSettings, loadCliSettings } from "./utils/cli.ts";
 import { catchError } from "./utils/error.ts";
 import { createLogger } from "./utils/logger.ts";
@@ -12,6 +13,12 @@ export type StartRelayOptions = {
 
 export const startRelay = async (options: StartRelayOptions) => {
 	const [file] = process.argv.slice(2);
+
+	const cleanup = createCleanup();
+
+	process.once("SIGTERM", async () => {
+		await cleanup.close();
+	});
 
 	await (async () => {
 		const settings = await (async () => {
@@ -28,8 +35,8 @@ export const startRelay = async (options: StartRelayOptions) => {
 
 		const clients = await Promise.all(
 			settings.profiles.map(async (profile) => {
-				const { client, emitter, close } = await createProfileClients(profile);
-				logger.info(`Browser for profile "${profile.name}" launched successfully`);
+				const { close, emitter, initialize } = await createProfileClients(profile);
+				await cleanup.add(close);
 				emitter.on("reload", ({ profileName }) => {
 					logger.info(`Page reloaded for profile "${profileName}"`);
 				});
@@ -40,8 +47,8 @@ export const startRelay = async (options: StartRelayOptions) => {
 					logger.error(`Error occurred for profile "${profileName}": ${error}`);
 				});
 
-				process.on("SIGTERM", () => close());
-				process.on("SIGINT", () => close());
+				const client = await initialize();
+				logger.info(`Browser for profile "${profile.name}" launched successfully`);
 
 				return { name: profile.name, client };
 			}),
@@ -53,10 +60,19 @@ export const startRelay = async (options: StartRelayOptions) => {
 		console.log(`Available profiles: ${settings.profiles.map((profile) => profile.name).join(", ")}`);
 
 		const server = serve({ fetch: app.fetch, port: settings.port });
-		process.on("SIGTERM", () => server.close());
-		process.on("SIGINT", () => server.close());
-	})().catch((error) => {
+		await cleanup.add(async () => void server.close());
+
+		await new Promise((resolve, reject) => {
+			server.on("error", (error) => {
+				reject(error);
+			});
+			server.on("close", () => {
+				resolve(undefined);
+			});
+		});
+	})().catch(async (error) => {
 		console.log(catchError(error));
 		process.exitCode = 1;
+		await cleanup.close();
 	});
 };

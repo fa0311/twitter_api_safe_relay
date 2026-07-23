@@ -1,6 +1,27 @@
 import boxen from "boxen";
 import chalk from "chalk";
 import ErrorStackParser from "error-stack-parser";
+import type { z } from "zod";
+
+export class ZodParseError<T> extends Error {
+	constructor(message: string, error: z.ZodError<T>) {
+		const text = error.issues.map((iss) => ` * [${iss.code}]  ${iss.message} at ${iss.path.join(".")}`).join("\n");
+		super(`${message}:\n${text}`);
+	}
+}
+
+export class CommandExecutionRequiredError extends Error {
+	constructor(message: string, command: string) {
+		const text = [
+			message,
+			"",
+			boxen(chalk.whiteBright.bold(` $ ${command} `), {
+				borderColor: "gray",
+			}),
+		];
+		super(text.join("\n"));
+	}
+}
 
 export const catchError = (error: unknown): string => {
 	if (error instanceof AggregateError) {

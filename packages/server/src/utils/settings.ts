@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ZodParseError } from "./error.ts";
 
 const MAX_TIMER_INTERVAL_MINUTES = Math.floor((2 ** 31 - 1) / 60_000);
 
@@ -53,4 +54,11 @@ const SettingsSchema = z.strictObject({
 
 export type Settings = z.infer<typeof SettingsSchema>;
 
-export const loadSettings = (data: unknown) => SettingsSchema.parseAsync(data);
+export const loadSettings = (data: unknown) => {
+	const result = SettingsSchema.safeParse(data);
+	if (result.success) {
+		return result.data;
+	}
+
+	throw new ZodParseError("Failed to parse settings JSON", result.error);
+};
