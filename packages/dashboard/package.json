@@ -25,8 +25,7 @@
 		"build": "pnpm clean && vite build && tsc -p tsconfig.server.json",
 		"prepack": "pnpm build",
 		"test": "vitest run",
-		"check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.server.json --noEmit",
-		"verify": "pnpm exec biome lint . && pnpm check && pnpm test && pnpm build"
+		"check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.server.json --noEmit"
 	},
 	"keywords": [
 		"twitter",
