@@ -16,7 +16,6 @@ jobs:
 
     env:
       IMAGE: ghcr.io/${{ github.repository }}
-      TAG: latest
 
     strategy:
       fail-fast: false
@@ -24,20 +23,29 @@ jobs:
         include:
           - target: relay
             suffix: relay
+            version_path: packages/server
           - target: dashboard
             suffix: dashboard
+            version_path: packages/dashboard
           - target: relay-slim
             suffix: relay-slim
+            version_path: packages/server
           - target: dashboard-slim
             suffix: dashboard-slim
+            version_path: packages/dashboard
           - target: relay-firefox
             suffix: relay-firefox
+            version_path: packages/server
           - target: dashboard-firefox
             suffix: dashboard-firefox
+            version_path: packages/dashboard
           - target: relay-webkit
             suffix: relay-webkit
+            version_path: packages/server
           - target: dashboard-webkit
             suffix: dashboard-webkit
+            version_path: packages/dashboard
+          # No version_path: targets without a package are versioned by the built image hash.
           - target: init-profile
             suffix: init-profile
 
@@ -58,20 +66,49 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Compute tags
-        id: vars
-        run: |
-          SHORT_SHA="${GITHUB_SHA::7}"
-          echo "short_sha=$SHORT_SHA" >> "$GITHUB_OUTPUT"
+      - name: Build (${{ matrix.target }})
+        id: build
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
+        with:
+          context: .
+          target: ${{ matrix.target }}
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Build and push (${{ matrix.target }})
+      - name: Compute version
+        id: vars
+        env:
+          VERSION_PATH: ${{ matrix.version_path }}
+          IMAGE_ID: ${{ steps.build.outputs.imageid }}
+        run: |
+          if [[ -n "$VERSION_PATH" ]]; then
+            version="$(node -p "require('./${VERSION_PATH}/package.json').version")"
+          else
+            version="$(echo "${IMAGE_ID#sha256:}" | cut -c1-12)"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Check published image
+        id: exists
+        env:
+          TAG: ${{ env.IMAGE }}:${{ steps.vars.outputs.version }}-${{ matrix.suffix }}
+        run: |
+          if docker manifest inspect "$TAG" >/dev/null 2>&1; then
+            echo "should_push=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping ${TAG}: already published."
+          else
+            echo "should_push=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Push (${{ matrix.target }})
+        if: steps.exists.outputs.should_push == 'true'
         uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         with:
           context: .
           target: ${{ matrix.target }}
           push: true
           tags: |
-            ${{ env.IMAGE }}:${{ env.TAG }}-${{ matrix.suffix }}
-            ${{ env.IMAGE }}:sha-${{ steps.vars.outputs.short_sha }}-${{ matrix.suffix }}
+            ${{ env.IMAGE }}:latest-${{ matrix.suffix }}
+            ${{ env.IMAGE }}:${{ steps.vars.outputs.version }}-${{ matrix.suffix }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max

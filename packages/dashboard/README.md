@@ -8,7 +8,22 @@ Place `settings.json` in the current working directory, then run:
 pnpx twitter-api-safe-relay-dashboard
 ```
 
-The package includes the built UI, dashboard API, and relay server.
+```json
+{
+  "port": 3000,
+  "profiles": [
+    {
+      "name": "account1",
+      "browser": {
+        "type": "launch",
+        "userDataDir": "./user_data/account1"
+      }
+    }
+  ]
+}
+```
+
+The package includes the built UI, dashboard API, and relay server. See [`twitter-api-safe-relay`](https://www.npmjs.com/package/twitter-api-safe-relay) for the full settings reference and relay endpoints.
 
 For workspace development, run:
 

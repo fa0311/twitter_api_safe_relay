@@ -1,5 +1,5 @@
 import type { EntryFilters, SortMode } from "../entryFilters.ts";
-import { type DebugEntry, type MethodFilter, type VersionFilter } from "../entryUtils.ts";
+import type { DebugEntry, MethodFilter, VersionFilter } from "../entryUtils.ts";
 import { useDebugEntriesStore, useEntrySelectionStore } from "../store.ts";
 
 const methodOptions: { value: MethodFilter; label: string }[] = [
