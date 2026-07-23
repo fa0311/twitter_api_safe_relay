@@ -42,6 +42,7 @@
 	},
 	"scripts": {
 		"build": "rimraf dist && tsc -p tsconfig.build.json",
+		"prepack": "pnpm build",
 		"check": "tsc -p tsconfig.json --noEmit"
 	},
 	"keywords": [
