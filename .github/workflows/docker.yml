@@ -45,7 +45,6 @@ jobs:
           - target: dashboard-webkit
             suffix: dashboard-webkit
             version_path: packages/dashboard
-          # No version_path: targets without a package are versioned by the built image hash.
           - target: init-profile
             suffix: init-profile
 
@@ -73,6 +72,8 @@ jobs:
           context: .
           target: ${{ matrix.target }}
           push: false
+          load: true
+          provenance: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
