@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { type DebugEntry, defaultScriptOf } from "../entryUtils";
-import { useDebugEntriesStore, useEntrySelectionStore } from "../store";
-import { CodeEditor } from "./CodeEditor";
-import { DetailHeader } from "./DetailHeader";
-import { type DetailTab, detailPayloadOf, detailTabs } from "./detailPaneModel";
+import { type DebugEntry, defaultScriptOf } from "../entryUtils.ts";
+import { useDebugEntriesStore, useEntrySelectionStore } from "../store.ts";
+import { CodeEditor } from "./CodeEditor.tsx";
+import { DetailHeader } from "./DetailHeader.tsx";
+import { type DetailTab, detailPayloadOf, detailTabs } from "./detailPaneModel.ts";
 
 export const DetailPane = () => {
 	const selectedEntryId = useEntrySelectionStore((s) => s.selectedEntryId);

@@ -16,6 +16,8 @@
 		"declaration": true,
 		"declarationMap": true,
 		"removeComments": false,
+		"allowImportingTsExtensions": true,
+		"rewriteRelativeImportExtensions": true,
 
 		/* Interop Constraints */
 		"esModuleInterop": true,

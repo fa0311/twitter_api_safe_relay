@@ -2,8 +2,10 @@ import { EventEmitter } from "node:events";
 import { match } from "ts-pattern";
 import { createTwitterBrowser } from "twitter-api-safe-request";
 
-import { connectBrowser, launchBrowser } from "./browser.js";
-import type { Settings } from "./settings.js";
+import { connectBrowser, launchBrowser } from "./browser.ts";
+import { createCleanup } from "./cleanup.ts";
+
+import type { Settings } from "./settings.ts";
 
 type ProfileEvents = {
 	reload: [event: { profileName: string }];
@@ -18,6 +20,7 @@ const connectProfileBrowser = async (profile: Profile) => {
 		.with({ type: "launch" }, (settings) =>
 			launchBrowser({
 				browserType: settings.browserType,
+				channel: settings.channel,
 				userDataDir: settings.userDataDir,
 				headless: settings.headless,
 				executablePath: settings.executablePath,
@@ -38,28 +41,38 @@ const connectProfileBrowser = async (profile: Profile) => {
 
 export const createProfileClients = async (profile: Profile) => {
 	const emitter = new EventEmitter<ProfileEvents>();
+	const cleanup = createCleanup();
 
 	const [context, close] = await connectProfileBrowser(profile);
-	const page = context.pages()[0] ?? (await context.newPage());
-	const client = createTwitterBrowser(page);
-	await client.inject();
-	await client.goto(profile.home.url);
+	await cleanup.add(close);
 
-	if (profile.pageReloadIntervalMinutes) {
-		const call = async () => {
-			emitter.emit("reload", { profileName: profile.name });
-			await client.page.reload().catch((error) => {
-				emitter.emit("error", { profileName: profile.name, error });
+	return {
+		close: cleanup.close,
+		emitter: emitter,
+		initialize: async () => {
+			const page = context.pages()[0] ?? (await context.newPage());
+			const client = createTwitterBrowser(page);
+			await client.inject();
+			await client.goto(profile.home.url);
+
+			if (profile.pageReloadIntervalMinutes) {
+				const call = async () => {
+					emitter.emit("reload", { profileName: profile.name });
+					await client.page.reload().catch((error) => {
+						emitter.emit("error", { profileName: profile.name, error });
+					});
+				};
+				const timer = setInterval(call, profile.pageReloadIntervalMinutes * 60_000);
+				await cleanup.add(async () => clearInterval(timer));
+			}
+			client.page.on("crash", async () => {
+				emitter.emit("crash", { profileName: profile.name });
+				await client.page.reload().catch((error) => {
+					emitter.emit("error", { profileName: profile.name, error });
+				});
 			});
-		};
-		setInterval(call, profile.pageReloadIntervalMinutes * 60_000);
-	}
-	client.page.on("crash", async () => {
-		emitter.emit("crash", { profileName: profile.name });
-		await client.page.reload().catch((error) => {
-			emitter.emit("error", { profileName: profile.name, error });
-		});
-	});
 
-	return { client, close, emitter };
+			return client;
+		},
+	};
 };

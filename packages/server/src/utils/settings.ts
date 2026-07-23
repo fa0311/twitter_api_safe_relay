@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ZodParseError } from "./error.ts";
 
 const MAX_TIMER_INTERVAL_MINUTES = Math.floor((2 ** 31 - 1) / 60_000);
 
@@ -21,6 +22,7 @@ const HomeSchema = z.strictObject({
 const LunchBrowserSchema = z.strictObject({
 	type: z.literal("launch"),
 	browserType: z.enum(["chromium", "firefox", "webkit"]).default("chromium"),
+	channel: z.string().min(1).optional(),
 	headless: z.boolean().default(false),
 	viewport: ViewportSchema.optional(),
 	proxy: ProxySchema.optional(),
@@ -32,13 +34,13 @@ const LunchBrowserSchema = z.strictObject({
 
 const CdpBrowserSchema = z.strictObject({
 	type: z.literal("cdp"),
-	browserType: z.enum(["chromium", "firefox", "webkit"]).default("chromium"),
+	browserType: z.enum(["chromium"]).default("chromium"),
 	cdpEndpoint: z.string().min(1, "CDP endpoint is required"),
 });
 
 const ProfileSchema = z.strictObject({
 	name: z.string().min(1, "Profile name is required"),
-	home: HomeSchema.default(HomeSchema.parse({})),
+	home: HomeSchema.prefault({}),
 	pageReloadIntervalMinutes: z.number().int().min(1).max(MAX_TIMER_INTERVAL_MINUTES).optional(),
 	browser: z.discriminatedUnion("type", [LunchBrowserSchema, CdpBrowserSchema]),
 });
@@ -52,4 +54,11 @@ const SettingsSchema = z.strictObject({
 
 export type Settings = z.infer<typeof SettingsSchema>;
 
-export const loadSettings = (data: unknown) => SettingsSchema.parseAsync(data);
+export const loadSettings = (data: unknown) => {
+	const result = SettingsSchema.safeParse(data);
+	if (result.success) {
+		return result.data;
+	}
+
+	throw new ZodParseError("Failed to parse settings JSON", result.error);
+};

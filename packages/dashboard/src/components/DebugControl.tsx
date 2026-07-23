@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useDebugEntriesStore } from "../store";
+import { useDebugEntriesStore } from "../store.ts";
 
 const tradeoffs = [
 	{

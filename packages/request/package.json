@@ -33,7 +33,6 @@
 	},
 	"scripts": {
 		"clean": "rimraf dist",
-		"dev": "tsc -p tsconfig.json --watch",
 		"build": "pnpm clean && tsc -p tsconfig.json",
 		"test": "vitest run",
 		"type-check": "tsc -p tsconfig.json --noEmit",

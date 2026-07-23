@@ -3,15 +3,36 @@
 HTTP relay server for safe Twitter/X web API requests through Playwright profiles.
 
 ```sh
-twitter-api-safe-relay
+pnpx twitter-api-safe-relay [settings-file]
 ```
 
-Reads settings from `../settings.json` relative to the working directory. In this workspace, the shared default settings file lives at `packages/settings.json`.
+Reads the settings file (JSON or JSONC; comments and trailing commas are allowed) given as the first argument. Without an argument, an interactive prompt asks which browser to launch:
 
-The debug API and relay are available as a separate entry point:
+```json
+{
+  "port": 3000,
+  "profiles": [
+    {
+      "name": "account1",
+      "browser": {
+        "type": "launch",
+        "userDataDir": "./user_data/account1"
+      }
+    }
+  ]
+}
+```
+
+Sign in to X/Twitter in the launched browser on first run. If the Playwright Chromium browser is not installed, either run `pnpx playwright install chromium` or set `"channel": "chrome"` in the browser settings to use the system Chrome.
+
+Once the relay is running, replace the X.com origin with the relay origin and keep the path/query/body shape:
 
 ```sh
-twitter-api-safe-debug
+curl 'http://localhost:3000/i/api/graphql/gKia-nBM9kwuDEfSDeWMfQ/HomeTimeline'
 ```
 
-In the workspace, use `pnpm --filter twitter-api-safe-relay dev:debug` during development. It serves `/api/events` and `/i/api/graphql/*` on port `3000` for the Vite dashboard UI.
+The dashboard is published separately:
+
+```sh
+pnpx twitter-api-safe-relay-dashboard
+```

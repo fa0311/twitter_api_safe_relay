@@ -6,32 +6,13 @@
 	"type": "module",
 	"scripts": {
 		"build": "pnpm -r run build",
-		"build:request": "pnpm --filter twitter-api-safe-request build",
-		"build:relay": "pnpm --filter twitter-api-safe-relay build",
-		"build:dashboard": "pnpm --filter twitter-api-safe-dashboard build",
-		"build:wxt": "pnpm --filter twitter-api-safe-wxt build",
-		"build:wxt:example": "pnpm --filter twitter-api-safe-example-basic build",
-		"clean": "pnpm -r run clean",
-		"dev:relay": "pnpm --filter twitter-api-safe-relay dev",
-		"dev:relay:debug": "pnpm --filter twitter-api-safe-relay dev:debug",
-		"dev:dashboard": "pnpm --filter twitter-api-safe-dashboard dev",
+		"predev:relay": "pnpm --filter twitter-api-safe-relay build",
+		"dev:relay": "concurrently --kill-others --names server,ui \"node --watch --conditions=development packages/dashboard/server/server.ts ./settings.json\" \"pnpm --filter twitter-api-safe-relay-dashboard dev\"",
 		"dev:wxt": "pnpm --filter twitter-api-safe-example-basic dev",
-		"start:relay": "pnpm --filter twitter-api-safe-relay start",
-		"start:relay:debug": "pnpm --filter twitter-api-safe-relay start:debug",
 		"test": "pnpm -r run test",
-		"test:unit": "pnpm --filter twitter-api-safe-dashboard test",
-		"test:request": "pnpm --filter twitter-api-safe-request test",
-		"test:relay": "pnpm --filter twitter-api-safe-relay test",
-		"test:dashboard": "pnpm --filter twitter-api-safe-dashboard test",
 		"type-check": "pnpm -r run type-check",
-		"type-check:request": "pnpm --filter twitter-api-safe-request type-check",
-		"type-check:relay": "pnpm --filter twitter-api-safe-relay type-check",
-		"type-check:dashboard": "pnpm --filter twitter-api-safe-dashboard type-check",
-		"type-check:wxt": "pnpm --filter twitter-api-safe-wxt type-check",
 		"lint": "biome lint .",
-		"lint:fix": "biome lint --write .",
-		"format": "biome format --write .",
-		"check": "biome check --write ."
+		"format": "biome format --write ."
 	},
 	"keywords": [
 		"typescript",
@@ -43,6 +24,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.16",
 		"@types/node": "^25.0.2",
+		"concurrently": "^10.0.3",
 		"typescript": "^5.9.3"
 	},
 	"packageManager": "pnpm@11.5.0"

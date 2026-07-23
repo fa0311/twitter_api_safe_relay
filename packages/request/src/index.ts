@@ -4,5 +4,5 @@ export type {
 	TwitterApiHookEntry,
 	TwitterApiHookManager,
 	TwitterApiProfileClient,
-} from "./client.js";
-export { createHookManager, createTwitterBrowser } from "./client.js";
+} from "./client.ts";
+export { createHookManager, createTwitterBrowser } from "./client.ts";

@@ -182,11 +182,7 @@ pnpm build
 pnpm dev:relay
 ```
 
-For the debug dashboard:
-
-```sh
-pnpm dev:relay:debug
-```
+This starts both the dashboard server and Vite UI.
 
 If you use a `launch` profile and do not already have the browser installed:
 
@@ -197,7 +193,7 @@ pnpm exec playwright install chromium
 ## Tests
 
 ```sh
-pnpm test:dashboard
-pnpm test:request
-pnpm test:relay
+pnpm --filter twitter-api-safe-relay-dashboard test
+pnpm --filter twitter-api-safe-request test
+pnpm --filter twitter-api-safe-relay test
 ```

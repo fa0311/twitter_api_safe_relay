@@ -1,8 +1,8 @@
 import type { TwitterApiHook, TwitterApiHookEntry } from "twitter-api-safe-inject/types";
 import type { UnlistedScriptDefinition } from "wxt";
 import { defineUnlistedScript } from "wxt/utils/define-unlisted-script";
-import type { Command } from "../command.js";
-import { createHandler } from "../protocol.js";
+import type { Command } from "../command.ts";
+import { createHandler } from "../protocol.ts";
 
 type RegisteredHook = {
 	name: string;

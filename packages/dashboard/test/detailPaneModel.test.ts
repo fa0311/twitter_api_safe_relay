@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { detailPayloadOf, detailTabs } from "../src/components/detailPaneModel";
-import type { DebugEntry } from "../src/entryUtils";
+import { detailPayloadOf, detailTabs } from "../src/components/detailPaneModel.ts";
+import type { DebugEntry } from "../src/entryUtils.ts";
 
 const entry = {
 	id: 1,

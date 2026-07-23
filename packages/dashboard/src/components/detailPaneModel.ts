@@ -1,4 +1,4 @@
-import type { DebugEntry } from "../entryUtils";
+import type { DebugEntry } from "../entryUtils.ts";
 
 export const detailTabs = [
 	{ id: "request", label: "Request" },

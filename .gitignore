@@ -1,4 +1,5 @@
 dist
+server-dist
 node_modules
 user_data
 .wxt

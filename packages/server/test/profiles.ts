@@ -1,6 +1,6 @@
 import type { BrowserContext, Page } from "playwright";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Settings } from "../src/utils/settings.js";
+import type { Settings } from "../src/utils/settings.ts";
 
 const mocks = vi.hoisted(() => ({
 	connectBrowser: vi.fn(),
@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
 	launchBrowser: vi.fn(),
 }));
 
-vi.mock("../src/utils/browser.js", () => ({
+vi.mock("../src/utils/browser.ts", () => ({
 	connectBrowser: mocks.connectBrowser,
 	launchBrowser: mocks.launchBrowser,
 }));
@@ -17,7 +17,7 @@ vi.mock("twitter-api-safe-request", () => ({
 	createTwitterBrowser: mocks.createTwitterBrowser,
 }));
 
-import { createProfileClients } from "../src/utils/profiles.js";
+import { createProfileClients } from "../src/utils/profiles.ts";
 
 type Profile = Settings["profiles"][number];
 
@@ -60,14 +60,18 @@ describe("createProfileClients", () => {
 		mocks.createTwitterBrowser.mockReturnValue(client);
 
 		const result = await createProfileClients(createProfile("account1"));
+		const created = await result.initialize();
 
 		expect(context.newPage).not.toHaveBeenCalled();
 		expect(mocks.createTwitterBrowser).toHaveBeenCalledWith(xPage);
 		expect(client.inject).toHaveBeenCalledOnce();
 		expect(client.goto).toHaveBeenCalledWith("https://x.com/home");
 		expect(client.inject.mock.invocationCallOrder[0]!).toBeLessThan(client.goto.mock.invocationCallOrder[0]!);
-		expect(result.client).toBe(client);
-		expect(result.close).toBe(close);
+		expect(created).toBe(client);
+
+		expect(close).not.toHaveBeenCalled();
+		await result.close();
+		expect(close).toHaveBeenCalledOnce();
 	});
 
 	it("creates a page when the context has no page", async () => {
@@ -77,7 +81,8 @@ describe("createProfileClients", () => {
 		mocks.connectBrowser.mockResolvedValue([context, vi.fn()]);
 		mocks.createTwitterBrowser.mockReturnValue(client);
 
-		await createProfileClients(createProfile("account1"));
+		const result = await createProfileClients(createProfile("account1"));
+		await result.initialize();
 
 		expect(context.newPage).toHaveBeenCalledOnce();
 		expect(mocks.createTwitterBrowser).toHaveBeenCalledWith(newPage);

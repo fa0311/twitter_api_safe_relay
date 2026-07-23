@@ -29,7 +29,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/settings.json ./settings.json
 
-WORKDIR /app/packages/server
+WORKDIR /app
 
 HEALTHCHECK CMD curl -f http://127.0.0.1:3000/health
 
@@ -37,51 +37,51 @@ FROM runtime-base AS runtime
 
 WORKDIR /app
 RUN pnpm --filter twitter-api-safe-relay exec playwright install --with-deps chromium
-WORKDIR /app/packages/server
+WORKDIR /app
 
 FROM runtime-base AS runtime-firefox
 
 WORKDIR /app
 RUN pnpm --filter twitter-api-safe-relay exec playwright install --with-deps firefox
-WORKDIR /app/packages/server
+WORKDIR /app
 
 FROM runtime-base AS runtime-webkit
 
 WORKDIR /app
 RUN pnpm --filter twitter-api-safe-relay exec playwright install --with-deps webkit
-WORKDIR /app/packages/server
+WORKDIR /app
 
 FROM runtime AS relay
 
-CMD ["node", "dist/server.js"]
+CMD ["node", "packages/server/dist/server.js", "./settings.json"]
 
 FROM runtime AS dashboard
 
-CMD ["node", "dist/debug/server.js"]
+CMD ["node", "packages/dashboard/server-dist/server.js", "./settings.json"]
 
 FROM runtime-base AS relay-slim
 
-CMD ["node", "dist/server.js"]
+CMD ["node", "packages/server/dist/server.js", "./settings.json"]
 
 FROM runtime-base AS dashboard-slim
 
-CMD ["node", "dist/debug/server.js"]
+CMD ["node", "packages/dashboard/server-dist/server.js", "./settings.json"]
 
 FROM runtime-firefox AS relay-firefox
 
-CMD ["node", "dist/server.js"]
+CMD ["node", "packages/server/dist/server.js", "./settings.json"]
 
 FROM runtime-firefox AS dashboard-firefox
 
-CMD ["node", "dist/debug/server.js"]
+CMD ["node", "packages/dashboard/server-dist/server.js", "./settings.json"]
 
 FROM runtime-webkit AS relay-webkit
 
-CMD ["node", "dist/server.js"]
+CMD ["node", "packages/server/dist/server.js", "./settings.json"]
 
 FROM runtime-webkit AS dashboard-webkit
 
-CMD ["node", "dist/debug/server.js"]
+CMD ["node", "packages/dashboard/server-dist/server.js", "./settings.json"]
 
 FROM alpine AS init-profile
 

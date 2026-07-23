@@ -1,7 +1,7 @@
-import { type DebugEntry, formatTime } from "../entryUtils";
-import { useEntrySelectionStore } from "../store";
-import { MethodBadge } from "./MethodBadge";
-import { VersionBadge } from "./VersionBadge";
+import { type DebugEntry, formatTime } from "../entryUtils.ts";
+import { useEntrySelectionStore } from "../store.ts";
+import { MethodBadge } from "./MethodBadge.tsx";
+import { VersionBadge } from "./VersionBadge.tsx";
 
 type Props = {
 	entries: DebugEntry[];

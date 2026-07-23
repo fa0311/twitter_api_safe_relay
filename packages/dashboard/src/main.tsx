@@ -1,9 +1,9 @@
 import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
-import { DebugControl } from "./components/DebugControl";
-import { DetailPane } from "./components/DetailPane";
-import { EntrySidebar } from "./components/EntrySidebar";
-import { useDebugEntriesStore } from "./store";
+import { DebugControl } from "./components/DebugControl.tsx";
+import { DetailPane } from "./components/DetailPane.tsx";
+import { EntrySidebar } from "./components/EntrySidebar.tsx";
+import { useDebugEntriesStore } from "./store.ts";
 import "./style.css";
 
 const ConnectionBadge = () => {
