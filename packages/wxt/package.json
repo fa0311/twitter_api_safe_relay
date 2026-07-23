@@ -42,8 +42,8 @@
 	},
 	"scripts": {
 		"build": "rimraf dist && tsc -p tsconfig.build.json",
-		"type-check": "tsc -p tsconfig.json --noEmit",
-		"verify": "pnpm exec biome lint . && pnpm type-check && pnpm build"
+		"check": "tsc -p tsconfig.json --noEmit",
+		"verify": "pnpm exec biome lint . && pnpm check && pnpm build"
 	},
 	"keywords": [
 		"twitter",

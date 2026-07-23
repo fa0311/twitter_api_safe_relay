@@ -27,6 +27,7 @@
 		"access": "public"
 	},
 	"scripts": {
+		"check": "node --check setup.js",
 		"verify": "pnpm exec biome lint . && node --check setup.js"
 	},
 	"keywords": [
