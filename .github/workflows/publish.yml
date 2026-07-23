@@ -47,8 +47,6 @@ jobs:
         with:
           run_install: false
 
-      # No registry-url here: it would write a static `_authToken` line to .npmrc,
-      # which makes `pnpm publish` skip the OIDC trusted-publishing token exchange.
       - name: Setup Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
@@ -88,10 +86,6 @@ jobs:
       - name: Install dependencies
         if: steps.version.outputs.should_publish == 'true'
         run: pnpm install --frozen-lockfile
-
-      - name: Verify package
-        if: steps.version.outputs.should_publish == 'true'
-        run: pnpm --filter "${{ matrix.package }}" verify
 
       - name: Publish new package version
         if: steps.version.outputs.should_publish == 'true'

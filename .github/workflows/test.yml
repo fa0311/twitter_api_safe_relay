@@ -47,6 +47,9 @@ jobs:
       - name: Type check
         run: pnpm type-check
 
+      - name: Build
+        run: pnpm build
+
       - name: Run dashboard tests
         run: pnpm --filter twitter-api-safe-relay-dashboard test
 
