@@ -37,6 +37,10 @@ export const startRelay = async (options: StartRelayOptions) => {
 			settings.profiles.map(async (profile) => {
 				const { close, emitter, initialize } = await createProfileClients(profile);
 				await cleanup.add(close);
+				emitter.on("close", async ({ profileName }) => {
+					logger.info(`Browser closed for profile "${profileName}"`);
+					await cleanup.close();
+				});
 				emitter.on("reload", ({ profileName }) => {
 					logger.info(`Page reloaded for profile "${profileName}"`);
 				});
@@ -56,8 +60,8 @@ export const startRelay = async (options: StartRelayOptions) => {
 
 		const app = await options.createApp(clients);
 
-		console.log(`Server is running on http://localhost:${settings.port}`);
-		console.log(`Available profiles: ${settings.profiles.map((profile) => profile.name).join(", ")}`);
+		logger.info(`Server is running on http://localhost:${settings.port}`);
+		logger.info(`Available profiles: ${settings.profiles.map((profile) => profile.name).join(", ")}`);
 
 		const server = serve({ fetch: app.fetch, port: settings.port });
 		await cleanup.add(async () => void server.close());

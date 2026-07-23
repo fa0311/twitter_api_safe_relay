@@ -11,6 +11,7 @@ type ProfileEvents = {
 	reload: [event: { profileName: string }];
 	crash: [event: { profileName: string }];
 	error: [event: { profileName: string; error: unknown }];
+	close: [event: { profileName: string }];
 };
 
 type Profile = Settings["profiles"][number];
@@ -45,6 +46,10 @@ export const createProfileClients = async (profile: Profile) => {
 
 	const [context, close] = await connectProfileBrowser(profile);
 	await cleanup.add(close);
+
+	context.on("close", async () => {
+		emitter.emit("close", { profileName: profile.name });
+	});
 
 	return {
 		close: cleanup.close,

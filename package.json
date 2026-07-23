@@ -6,9 +6,8 @@
 	"type": "module",
 	"scripts": {
 		"build": "pnpm -r run build",
-		"predev:relay": "pnpm --filter twitter-api-safe-relay build",
-		"dev:tui": "pnpm --filter twitter-api-safe-relay-dashboard dev",
 		"dev:relay": "concurrently --kill-others --names server,ui \"node --watch --conditions=development packages/dashboard/server/server.ts ./settings.json\" \"pnpm --filter twitter-api-safe-relay-dashboard dev\"",
+		"dev:tui": "node --conditions=development packages/server/src/server.ts",
 		"dev:wxt": "pnpm --filter twitter-api-safe-example-basic dev",
 		"test": "pnpm -r run test",
 		"check": "pnpm -r run check",
