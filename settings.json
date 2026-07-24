@@ -7,7 +7,7 @@
 			"pageReloadIntervalMinutes": 1,
 			"browser": {
 				"type": "launch",
-				"userDataDir": "./user_data/account1",
+				"userDataDir": "./user_data",
 				"headless": false,
 				"viewport": { "width": 720, "height": 720 }
 			}

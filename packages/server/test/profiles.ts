@@ -37,6 +37,7 @@ const createContext = (pages: Page[], newPage: Page) =>
 	({
 		pages: vi.fn(() => pages),
 		newPage: vi.fn(async () => newPage),
+		on: vi.fn(),
 	}) as unknown as BrowserContext;
 
 const createClient = (page: Page) => ({
