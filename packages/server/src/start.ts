@@ -6,9 +6,10 @@ import { createDefaultSettings, loadCliSettings } from "./utils/cli.ts";
 import { catchError } from "./utils/error.ts";
 import { createLogger } from "./utils/logger.ts";
 import { createProfileClients } from "./utils/profiles.ts";
+import type { Settings } from "./utils/settings.ts";
 
 export type StartRelayOptions = {
-	createApp: (clients: AppOptions[]) => Promise<Hono>;
+	createApp: (clients: AppOptions[], settings: Settings) => Promise<Hono>;
 };
 
 export const startRelay = async (options: StartRelayOptions) => {
@@ -58,7 +59,7 @@ export const startRelay = async (options: StartRelayOptions) => {
 			}),
 		);
 
-		const app = await options.createApp(clients);
+		const app = await options.createApp(clients, settings);
 
 		logger.info(`Server is running on http://localhost:${settings.port}`);
 		logger.info(`Available profiles: ${settings.profiles.map((profile) => profile.name).join(", ")}`);

@@ -1,6 +1,6 @@
 {
 	"name": "twitter-api-safe-relay-dashboard",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "Vite dashboard UI for inspecting Twitter/X web API requests captured through twitter-api-safe-request.",
 	"repository": {
 		"type": "git",
@@ -8,24 +8,28 @@
 		"directory": "packages/dashboard"
 	},
 	"type": "module",
-	"bin": {
-		"twitter-api-safe-dashboard": "server-dist/server.js"
+	"exports": {
+		".": {
+			"types": "./index.d.ts",
+			"import": "./index.js"
+		}
 	},
 	"files": [
 		"dist",
-		"server-dist",
+		"index.js",
+		"index.d.ts",
 		"README.md"
 	],
 	"publishConfig": {
 		"access": "public"
 	},
 	"scripts": {
-		"clean": "rimraf dist server-dist",
+		"clean": "rimraf dist",
 		"dev": "vite",
-		"build": "pnpm clean && vite build && tsc -p tsconfig.server.json",
+		"build": "pnpm clean && vite build",
 		"prepack": "pnpm build",
 		"test": "vitest run",
-		"check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.server.json --noEmit"
+		"check": "tsc -p tsconfig.json --noEmit"
 	},
 	"keywords": [
 		"twitter",
@@ -37,11 +41,6 @@
 	],
 	"author": "",
 	"license": "MIT",
-	"dependencies": {
-		"@hono/node-server": "^1.19.4",
-		"hono": "^4.11.0",
-		"twitter-api-safe-relay": "workspace:*"
-	},
 	"devDependencies": {
 		"@codemirror/lang-javascript": "^6.2.5",
 		"@codemirror/lang-json": "^6.0.2",

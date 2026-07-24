@@ -49,6 +49,7 @@ const SettingsSchema = z.strictObject({
 	port: z.number().int().min(1).max(65535).default(3000),
 	logLevel: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
 	logPrettyPrint: z.boolean().default(true),
+	dashboard: z.boolean().default(true),
 	profiles: z.array(ProfileSchema).min(1, "At least one profile is required"),
 });
 

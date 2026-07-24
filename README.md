@@ -164,7 +164,7 @@ Each profile uses either:
 
 ## Docker
 
-The compose example in [`docker/`](docker/) runs the debug dashboard with an external Chromium browser over CDP.
+The compose example in [`docker/`](docker/) runs the relay with the debug dashboard enabled, using an external Chromium browser over CDP.
 
 ```sh
 docker compose -f docker/docker-compose.yml up
@@ -182,7 +182,7 @@ pnpm build
 pnpm dev:relay
 ```
 
-This starts both the dashboard server and Vite UI.
+This starts the relay server and the Vite UI.
 
 If you use a `launch` profile and do not already have the browser installed:
 

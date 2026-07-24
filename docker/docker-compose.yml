@@ -24,7 +24,7 @@ services:
     shm_size: "4gb"
 
   twitter-relay-dashboard:
-    image: ghcr.io/fa0311/twitter_api_safe_relay:latest-dashboard-slim
+    image: ghcr.io/fa0311/twitter_api_safe_relay:latest-relay-slim
     container_name: twitter_api_safe_relay
     restart: unless-stopped
     depends_on:

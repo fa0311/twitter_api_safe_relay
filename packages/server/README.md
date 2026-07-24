@@ -31,8 +31,4 @@ Once the relay is running, replace the X.com origin with the relay origin and ke
 curl 'http://localhost:3000/i/api/graphql/gKia-nBM9kwuDEfSDeWMfQ/HomeTimeline'
 ```
 
-The dashboard is published separately:
-
-```sh
-pnpx twitter-api-safe-relay-dashboard
-```
+The relay also serves the debug dashboard UI (from [`twitter-api-safe-relay-dashboard`](https://www.npmjs.com/package/twitter-api-safe-relay-dashboard)) and its API on the same port. Set `"dashboard": false` in the settings file to disable it.
