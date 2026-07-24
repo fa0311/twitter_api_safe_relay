@@ -1,12 +1,12 @@
 # twitter-api-safe-relay-dashboard
 
-Dashboard server and Vite UI for inspecting Twitter/X web API requests.
+Vite dashboard UI for inspecting Twitter/X web API requests captured through twitter-api-safe-request.
+
+This package ships only the built frontend assets. [`twitter-api-safe-relay`](https://www.npmjs.com/package/twitter-api-safe-relay) depends on it and serves the UI by default (`"dashboard": false` in the relay settings disables it):
 
 ```sh
-pnpx twitter-api-safe-relay-dashboard [settings-file]
+pnpx twitter-api-safe-relay [settings-file]
 ```
-
-Pass a settings file (JSON or JSONC) as the first argument. Without an argument, an interactive prompt asks which browser to launch.
 
 ```json
 {
@@ -23,7 +23,7 @@ Pass a settings file (JSON or JSONC) as the first argument. Without an argument,
 }
 ```
 
-The package includes the built UI, dashboard API, and relay server. See [`twitter-api-safe-relay`](https://www.npmjs.com/package/twitter-api-safe-relay) for the full settings reference and relay endpoints.
+See [`twitter-api-safe-relay`](https://www.npmjs.com/package/twitter-api-safe-relay) for the full settings reference and relay endpoints.
 
 For workspace development, run:
 
@@ -31,4 +31,4 @@ For workspace development, run:
 pnpm dev:relay
 ```
 
-The Vite UI runs on port `5173` and proxies API requests to the dashboard server on port `3000`.
+The Vite UI runs on port `5173` and proxies API requests to the relay server on port `3000`.

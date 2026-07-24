@@ -55,33 +55,17 @@ FROM runtime AS relay
 
 CMD ["node", "packages/server/dist/server.js", "./settings.json"]
 
-FROM runtime AS dashboard
-
-CMD ["node", "packages/dashboard/server-dist/server.js", "./settings.json"]
-
 FROM runtime-base AS relay-slim
 
 CMD ["node", "packages/server/dist/server.js", "./settings.json"]
-
-FROM runtime-base AS dashboard-slim
-
-CMD ["node", "packages/dashboard/server-dist/server.js", "./settings.json"]
 
 FROM runtime-firefox AS relay-firefox
 
 CMD ["node", "packages/server/dist/server.js", "./settings.json"]
 
-FROM runtime-firefox AS dashboard-firefox
-
-CMD ["node", "packages/dashboard/server-dist/server.js", "./settings.json"]
-
 FROM runtime-webkit AS relay-webkit
 
 CMD ["node", "packages/server/dist/server.js", "./settings.json"]
-
-FROM runtime-webkit AS dashboard-webkit
-
-CMD ["node", "packages/dashboard/server-dist/server.js", "./settings.json"]
 
 FROM alpine AS init-profile
 

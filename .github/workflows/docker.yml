@@ -24,27 +24,15 @@ jobs:
           - target: relay
             suffix: relay
             version_path: packages/server
-          - target: dashboard
-            suffix: dashboard
-            version_path: packages/dashboard
           - target: relay-slim
             suffix: relay-slim
             version_path: packages/server
-          - target: dashboard-slim
-            suffix: dashboard-slim
-            version_path: packages/dashboard
           - target: relay-firefox
             suffix: relay-firefox
             version_path: packages/server
-          - target: dashboard-firefox
-            suffix: dashboard-firefox
-            version_path: packages/dashboard
           - target: relay-webkit
             suffix: relay-webkit
             version_path: packages/server
-          - target: dashboard-webkit
-            suffix: dashboard-webkit
-            version_path: packages/dashboard
           - target: init-profile
             suffix: init-profile
 
