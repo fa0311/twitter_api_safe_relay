@@ -3,14 +3,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Settings } from "../src/utils/settings.ts";
 
 const mocks = vi.hoisted(() => ({
-	connectBrowser: vi.fn(),
+	connectProfileBrowser: vi.fn(),
 	createTwitterBrowser: vi.fn(),
-	launchBrowser: vi.fn(),
 }));
 
 vi.mock("../src/utils/browser.ts", () => ({
-	connectBrowser: mocks.connectBrowser,
-	launchBrowser: mocks.launchBrowser,
+	connectProfileBrowser: mocks.connectProfileBrowser,
 }));
 
 vi.mock("twitter-api-safe-request", () => ({
@@ -57,7 +55,7 @@ describe("createProfileClients", () => {
 		const context = createContext([xPage], newPage);
 		const client = createClient(xPage);
 		const close = vi.fn();
-		mocks.connectBrowser.mockResolvedValue([context, close]);
+		mocks.connectProfileBrowser.mockResolvedValue([context, close]);
 		mocks.createTwitterBrowser.mockReturnValue(client);
 
 		const result = await createProfileClients(createProfile("account1"));
@@ -79,7 +77,7 @@ describe("createProfileClients", () => {
 		const newPage = createPage("about:blank");
 		const context = createContext([], newPage);
 		const client = createClient(newPage);
-		mocks.connectBrowser.mockResolvedValue([context, vi.fn()]);
+		mocks.connectProfileBrowser.mockResolvedValue([context, vi.fn()]);
 		mocks.createTwitterBrowser.mockReturnValue(client);
 
 		const result = await createProfileClients(createProfile("account1"));

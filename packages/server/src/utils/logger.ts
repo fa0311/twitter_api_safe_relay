@@ -1,15 +1,32 @@
 import pino from "pino";
 import pinoPretty from "pino-pretty";
+import type { Settings } from "./settings.ts";
 
-type LoggerSettings = {
-	logLevel: string;
-	logPrettyPrint: boolean;
-};
+type Logger = Settings["logger"];
 
-export const createLogger = (settings: LoggerSettings) => {
-	const options = {
-		level: settings.logLevel,
-		timestamp: pino.stdTimeFunctions.isoTime,
-	};
-	return settings.logPrettyPrint ? pino(options, pinoPretty()) : pino(options);
+export const createLogger = (logger: Logger) => {
+	switch (logger.output.type) {
+		case "stdout": {
+			const options = {
+				level: logger.level,
+				timestamp: pino.stdTimeFunctions.isoTime,
+			};
+			if (logger.output.prettyPrint.enabled) {
+				return pino(options, pinoPretty());
+			} else {
+				return pino(options);
+			}
+		}
+		case "file": {
+			const options = {
+				level: logger.level,
+				timestamp: pino.stdTimeFunctions.isoTime,
+			};
+			if (logger.output.prettyPrint.enabled) {
+				return pino(options, pinoPretty({ destination: logger.output.filePath }));
+			} else {
+				return pino(options, pino.destination(logger.output.filePath));
+			}
+		}
+	}
 };

@@ -1,5 +1,6 @@
-export { default as createApp } from "./app.ts";
-export { createDashboardApp } from "./dashboard/app.ts";
-export { type StartRelayOptions, startRelay } from "./start.ts";
-export { connectBrowser, launchBrowser } from "./utils/browser.ts";
-export { loadSettings, type Settings } from "./utils/settings.ts";
+export { startRelay } from "./start.ts";
+export { createCleanup } from "./utils/cleanup.ts";
+export { createDefaultSettings, loadCliSettings } from "./utils/cli.ts";
+export { CommandExecutionRequiredError, catchError, ZodParseError } from "./utils/error.ts";
+export { createLogger } from "./utils/logger.ts";
+export { SettingsSchema } from "./utils/settings.ts";

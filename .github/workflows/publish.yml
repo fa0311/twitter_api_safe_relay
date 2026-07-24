@@ -31,6 +31,8 @@ jobs:
             path: packages/server
           - package: twitter-api-safe-relay-dashboard
             path: packages/dashboard
+          - package: twitter-api-safe-mcp
+            path: packages/mcp
 
     permissions:
       contents: read
