@@ -10,7 +10,7 @@ import { createLogger } from "./utils/logger.ts";
 import { createProfileClients } from "./utils/profiles.ts";
 import type { Settings } from "./utils/settings.ts";
 
-type OnReady = {
+export type OnReady = {
 	clients: AppOptions[];
 	close: () => Promise<void>;
 };

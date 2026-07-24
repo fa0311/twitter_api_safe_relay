@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { catchError, createCleanup, createDefaultSettings, loadCliSettings, startRelay } from "twitter-api-safe-relay";
+import { startRelay } from "twitter-api-safe-relay";
+import { catchError, createCleanup, createDefaultSettings, loadCliSettings } from "twitter-api-safe-relay/tools";
 import createMcpServer from "./app.ts";
 import { parseSettings } from "./utils/settings.ts";
 

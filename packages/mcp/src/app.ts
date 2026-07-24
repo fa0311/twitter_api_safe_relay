@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { randomChoice } from "twitter-api-safe-relay/tools";
 import type { TwitterApiProfileClient } from "twitter-api-safe-request";
 import { z } from "zod";
-import { randomChoice } from "./utils/random.ts";
 
 type AppOptions = {
 	name: string;

@@ -1,4 +1,5 @@
-import { SettingsSchema, ZodParseError } from "twitter-api-safe-relay";
+import { SettingsSchema } from "twitter-api-safe-relay";
+import { ZodParseError } from "twitter-api-safe-relay/tools";
 import z from "zod";
 
 const PrettyPrintSchema = z.strictObject({

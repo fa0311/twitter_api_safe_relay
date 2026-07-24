@@ -15,6 +15,11 @@
 			"types": "./src/index.ts",
 			"development": "./src/index.ts",
 			"import": "./dist/index.js"
+		},
+		"./tools": {
+			"types": "./src/tools.ts",
+			"development": "./src/tools.ts",
+			"import": "./dist/tools.js"
 		}
 	},
 	"bin": {
@@ -30,6 +35,10 @@
 			".": {
 				"types": "./dist/index.d.ts",
 				"import": "./dist/index.js"
+			},
+			"./tools": {
+				"types": "./dist/tools.d.ts",
+				"import": "./dist/tools.js"
 			}
 		}
 	},
