@@ -1,14 +1,27 @@
 #!/usr/bin/env node
 
+import { serve } from "@hono/node-server";
+import { serveStatic } from "@hono/node-server/serve-static";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { startRelay } from "twitter-api-safe-relay";
-import { catchError, createCleanup, createDefaultSettings, loadCliSettings } from "twitter-api-safe-relay/tools";
+import { Hono } from "hono";
+import { createApp, createDashboardApp, createProfileClients } from "twitter-api-safe-relay";
+import { assetsRoot } from "twitter-api-safe-relay-dashboard";
+import {
+	catchError,
+	createCleanup,
+	createDefaultSettings,
+	createLogger,
+	loadCliSettings,
+} from "twitter-api-safe-relay/tools";
 import createMcpServer from "./app.ts";
 import { parseSettings } from "./utils/settings.ts";
 
 const cleanup = createCleanup();
 
 process.once("SIGTERM", async () => {
+	await cleanup.close();
+});
+process.once("SIGINT", async () => {
 	await cleanup.close();
 });
 
@@ -27,17 +40,82 @@ try {
 		}
 	})();
 
-	const relay = await startRelay(settings, async ({ clients, close }) => {
-		await cleanup.add(close);
-		const server = createMcpServer(clients);
-		await cleanup.add(async () => await server.close());
-		server.server.onclose = async () => {
-			await cleanup.close();
-		};
-		await server.connect(new StdioServerTransport());
+	const logger = createLogger(settings.logger);
+
+	const clients = await Promise.all(
+		settings.profiles.map(async (profile) => {
+			const { close, emitter, initialize } = await createProfileClients();
+			const promise = Promise.withResolvers();
+			await cleanup.add(close);
+			emitter.on("error", ({ profileName, error }) => {
+				logger.error(`Error occurred for profile "${profileName}": ${error}`);
+				promise.reject(error);
+			});
+			emitter.on("close", async ({ profileName }) => {
+				logger.info(`Browser closed for profile "${profileName}"`);
+				promise.resolve(undefined);
+			});
+			emitter.on("reload", ({ profileName }) => {
+				logger.info(`Page reloaded for profile "${profileName}"`);
+			});
+			emitter.on("crash", ({ profileName }) => {
+				logger.error(`Page crashed for profile "${profileName}"`);
+			});
+			emitter.on("pageerror", ({ profileName, error }) => {
+				logger.error(`Page error occurred for profile "${profileName}": ${error}`);
+			});
+
+			const client = await initialize(profile);
+			logger.info(`Browser for profile "${profile.name}" launched successfully`);
+
+			return { name: profile.name, client, promise };
+		}),
+	);
+
+	logger.info(`Available profiles: ${settings.profiles.map((profile) => profile.name).join(", ")}`);
+
+	const app = new Hono();
+	app.route("/", await createApp(clients));
+	if (settings.dashboard) {
+		app.route("/", createDashboardApp(clients));
+		app.use("/*", serveStatic({ root: assetsRoot }));
+	}
+
+	const server = serve({ fetch: app.fetch, port: settings.port });
+	await cleanup.add(async () => void server.close());
+
+	await new Promise((resolve, reject) => {
+		server.on("error", reject);
+		server.on("listening", async () => {
+			logger.info(`Server is running on http://localhost:${settings.port}`);
+			server.removeListener("error", reject);
+			resolve(undefined);
+		});
 	});
-	await cleanup.add(relay.close);
-	await relay.run();
+
+	const serverPromise = new Promise((resolve, reject) => {
+		server.on("error", (error) => {
+			reject(error);
+		});
+		server.on("close", () => {
+			resolve(undefined);
+		});
+	});
+
+	const mcpServer = createMcpServer(clients);
+	await cleanup.add(async () => await mcpServer.close());
+
+	const mcpPromise = new Promise((resolve) => {
+		mcpServer.server.onclose = () => {
+			logger.info("MCP connection closed");
+			resolve(undefined);
+		};
+	});
+
+	await mcpServer.connect(new StdioServerTransport());
+	logger.info("MCP server connected over stdio");
+
+	await Promise.race([...clients.map((client) => client.promise), serverPromise, mcpPromise]);
 } catch (error) {
 	console.error(catchError(error));
 	process.exitCode = 1;

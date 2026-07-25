@@ -1,14 +1,25 @@
 #!/usr/bin/env node
 
-import { startRelay } from "./start.ts";
+import { serve } from "@hono/node-server";
+import { serveStatic } from "@hono/node-server/serve-static";
+import { Hono } from "hono";
+import { assetsRoot } from "twitter-api-safe-relay-dashboard";
+import { createApp } from "./app.ts";
+import { createDashboardApp } from "./index.ts";
+
+import { createLogger } from "./tools.ts";
 import { createCleanup } from "./utils/cleanup.ts";
 import { createDefaultSettings, loadCliSettings } from "./utils/cli.ts";
 import { catchError } from "./utils/error.ts";
+import { createProfileClients } from "./utils/profiles.ts";
 import { parseSettings } from "./utils/settings.ts";
 
 const cleanup = createCleanup();
 
 process.once("SIGTERM", async () => {
+	await cleanup.close();
+});
+process.once("SIGINT", async () => {
 	await cleanup.close();
 });
 
@@ -27,9 +38,70 @@ try {
 		}
 	})();
 
-	const relay = await startRelay(settings, async () => {});
-	await cleanup.add(relay.close);
-	await relay.run();
+	const logger = createLogger(settings.logger);
+
+	const clients = await Promise.all(
+		settings.profiles.map(async (profile) => {
+			const { close, emitter, initialize } = await createProfileClients();
+			const promise = Promise.withResolvers();
+			await cleanup.add(close);
+			emitter.on("error", ({ profileName, error }) => {
+				logger.error(`Error occurred for profile "${profileName}": ${error}`);
+				promise.reject(error);
+			});
+			emitter.on("close", async ({ profileName }) => {
+				logger.info(`Browser closed for profile "${profileName}"`);
+				promise.resolve(undefined);
+			});
+			emitter.on("reload", ({ profileName }) => {
+				logger.info(`Page reloaded for profile "${profileName}"`);
+			});
+			emitter.on("crash", ({ profileName }) => {
+				logger.error(`Page crashed for profile "${profileName}"`);
+			});
+			emitter.on("pageerror", ({ profileName, error }) => {
+				logger.error(`Page error occurred for profile "${profileName}": ${error}`);
+			});
+
+			const client = await initialize(profile);
+			logger.info(`Browser for profile "${profile.name}" launched successfully`);
+
+			return { name: profile.name, client, promise };
+		}),
+	);
+
+	logger.info(`Available profiles: ${settings.profiles.map((profile) => profile.name).join(", ")}`);
+
+	const app = new Hono();
+	app.route("/", await createApp(clients));
+	if (settings.dashboard) {
+		app.route("/", createDashboardApp(clients));
+		app.use("/*", serveStatic({ root: assetsRoot }));
+	}
+
+	const server = serve({ fetch: app.fetch, port: settings.port });
+	await cleanup.add(async () => void server.close());
+
+	await new Promise((resolve, reject) => {
+		server.on("error", reject);
+		server.on("listening", async () => {
+			logger.info(`Server is running on http://localhost:${settings.port}`);
+			logger.info(`Available profiles: ${settings.profiles.map((profile) => profile.name).join(", ")}`);
+			server.removeListener("error", reject);
+			resolve(undefined);
+		});
+	});
+
+	const serverPromise = new Promise((resolve, reject) => {
+		server.on("error", (error) => {
+			reject(error);
+		});
+		server.on("close", () => {
+			resolve(undefined);
+		});
+	});
+
+	await Promise.race([...clients.map((client) => client.promise), serverPromise]);
 } catch (error) {
 	console.error(catchError(error));
 	process.exitCode = 1;

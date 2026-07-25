@@ -49,10 +49,13 @@
 	"author": "",
 	"license": "MIT",
 	"dependencies": {
+		"@hono/node-server": "^1.19.4",
 		"@modelcontextprotocol/sdk": "^1.25.0",
 		"twitter-api-safe-relay": "workspace:*",
+		"twitter-api-safe-relay-dashboard": "workspace:*",
 		"twitter-api-safe-request": "workspace:*",
-		"zod": "^4.1.13"
+		"zod": "^4.1.13",
+		"hono": "^4.11.0"
 	},
 	"devDependencies": {
 		"@types/node": "^25.0.2",

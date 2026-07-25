@@ -10,7 +10,7 @@ Run directly:
 pnpx twitter-api-safe-mcp [settings-file]
 ```
 
-When run in a terminal without a settings file, it interactively prompts for the browser at startup. When launched by an MCP client, a settings file is required. The settings file format is the same as [twitter-api-safe-relay](../server/README.md) (`port` and `dashboard` are ignored).
+When run in a terminal without a settings file, it interactively prompts for the browser at startup. When launched by an MCP client, a settings file is required. The settings file format is the same as [twitter-api-safe-relay](../server/README.md).
 
 MCP client configuration:
 
