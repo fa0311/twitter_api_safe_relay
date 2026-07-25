@@ -1,60 +1,34 @@
 import { EventEmitter } from "node:events";
-import { match } from "ts-pattern";
 import { createTwitterBrowser } from "twitter-api-safe-request";
-
-import { connectBrowser, launchBrowser } from "./browser.ts";
+import { connectProfileBrowser } from "./browser.ts";
 import { createCleanup } from "./cleanup.ts";
-
 import type { Settings } from "./settings.ts";
 
 type ProfileEvents = {
 	reload: [event: { profileName: string }];
 	crash: [event: { profileName: string }];
-	error: [event: { profileName: string; error: unknown }];
+	error: [event: { profileName: string; error: Error }];
 	close: [event: { profileName: string }];
+	pageerror: [event: { profileName: string; error: Error }];
 };
 
 type Profile = Settings["profiles"][number];
 
-const connectProfileBrowser = async (profile: Profile) => {
-	return match(profile.browser)
-		.with({ type: "launch" }, (settings) =>
-			launchBrowser({
-				browserType: settings.browserType,
-				channel: settings.channel,
-				userDataDir: settings.userDataDir,
-				headless: settings.headless,
-				executablePath: settings.executablePath,
-				env: settings.env,
-				proxy: settings.proxy,
-				args: settings.args,
-				viewport: settings.viewport,
-			}),
-		)
-		.with({ type: "cdp" }, (settings) =>
-			connectBrowser({
-				browserType: settings.browserType,
-				cdpEndpoint: settings.cdpEndpoint,
-			}),
-		)
-		.exhaustive();
-};
-
-export const createProfileClients = async (profile: Profile) => {
+export const createProfileClients = async () => {
 	const emitter = new EventEmitter<ProfileEvents>();
 	const cleanup = createCleanup();
-
-	const [context, close] = await connectProfileBrowser(profile);
-	await cleanup.add(close);
-
-	context.on("close", async () => {
-		emitter.emit("close", { profileName: profile.name });
-	});
 
 	return {
 		close: cleanup.close,
 		emitter: emitter,
-		initialize: async () => {
+		initialize: async (profile: Profile) => {
+			const [context, close] = await connectProfileBrowser(profile.browser);
+			await cleanup.add(close);
+
+			context.on("close", async () => {
+				emitter.emit("close", { profileName: profile.name });
+			});
+
 			const page = context.pages()[0] ?? (await context.newPage());
 			const client = createTwitterBrowser(page);
 			await client.inject();
@@ -72,6 +46,12 @@ export const createProfileClients = async (profile: Profile) => {
 			}
 			client.page.on("crash", async () => {
 				emitter.emit("crash", { profileName: profile.name });
+				await client.page.reload().catch((error) => {
+					emitter.emit("error", { profileName: profile.name, error });
+				});
+			});
+			client.page.on("pageerror", async (error) => {
+				emitter.emit("pageerror", { profileName: profile.name, error });
 				await client.page.reload().catch((error) => {
 					emitter.emit("error", { profileName: profile.name, error });
 				});

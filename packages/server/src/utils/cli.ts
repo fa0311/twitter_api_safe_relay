@@ -4,7 +4,7 @@ import { input, select } from "@inquirer/prompts";
 import { type ParseError, parse, printParseErrorCode } from "jsonc-parser";
 import { chromium, firefox, webkit } from "playwright";
 import { CommandExecutionRequiredError } from "./error.ts";
-import { loadSettings } from "./settings.ts";
+import type { SettingsInput } from "./settings.ts";
 
 type BrowserChoice = {
 	type: "launch" | "system" | "manual";
@@ -30,7 +30,7 @@ export const loadCliSettings = async (file: string) => {
 			`Failed to parse ${file}`,
 		);
 	}
-	return loadSettings(data);
+	return data;
 };
 
 export const createDefaultSettings = async () => {
@@ -54,7 +54,7 @@ export const createDefaultSettings = async () => {
 		}
 	})();
 
-	return loadSettings({
+	return {
 		profiles: [
 			{
 				name: "user",
@@ -67,5 +67,5 @@ export const createDefaultSettings = async () => {
 				},
 			},
 		],
-	});
+	} satisfies SettingsInput;
 };

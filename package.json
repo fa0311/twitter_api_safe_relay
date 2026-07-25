@@ -7,6 +7,7 @@
 	"scripts": {
 		"build": "pnpm -r run build",
 		"dev:relay": "concurrently --kill-others --names server,ui \"node --watch --conditions=development packages/server/src/server.ts ./settings.json\" \"pnpm --filter twitter-api-safe-relay-dashboard dev\"",
+		"dev:mcp": "node --conditions=development packages/mcp/src/server.ts ./settings.json",
 		"dev:tui": "node --conditions=development packages/server/src/server.ts",
 		"dev:wxt": "pnpm --filter twitter-api-safe-example-basic dev",
 		"test": "pnpm -r run test",

@@ -1,8 +1,8 @@
 import { createTwitterBrowser } from "twitter-api-safe-request";
 import { createIntegration } from "twitter-api-safe-test-utils";
 import { afterEach, describe, expect, it } from "vitest";
-import createApp from "../src/app.ts";
-import { launchBrowser } from "../src/utils/browser.ts";
+import { createApp } from "../src/app.ts";
+import { connectProfileBrowser } from "../src/utils/browser.ts";
 
 describe("someFunction", () => {
 	const integration = createIntegration();
@@ -10,7 +10,8 @@ describe("someFunction", () => {
 	afterEach(async () => integration.afterEachCall());
 
 	const createMockApp = async () => {
-		const [browser, close] = await launchBrowser({
+		const [browser, close] = await connectProfileBrowser({
+			type: "launch",
 			browserType: "chromium",
 			userDataDir: await integration.temp(),
 			headless: true,

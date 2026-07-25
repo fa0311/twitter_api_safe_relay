@@ -1,42 +1,34 @@
 import { chromium, firefox, webkit } from "playwright";
+import type { Settings } from "../utils/settings.ts";
 
-type LaunchBrowserSettings = {
-	browserType: "chromium" | "firefox" | "webkit";
-	channel: string | undefined;
-	userDataDir: string;
-	headless: boolean | undefined;
-	executablePath: string | undefined;
-	env: NodeJS.ProcessEnv | undefined;
-	proxy: { server: string; username?: string; password?: string } | undefined;
-	args: string[] | undefined;
-	viewport: { width: number; height: number } | undefined;
-};
+type Browser = Settings["profiles"][number]["browser"];
 
-type CdpBrowserSettings = {
-	browserType: "chromium" | "firefox" | "webkit";
-	cdpEndpoint: string;
-};
-
-export const launchBrowser = async (settings: LaunchBrowserSettings) => {
-	const browser = { chromium, firefox, webkit }[settings.browserType];
-	const context = await browser.launchPersistentContext(settings.userDataDir, {
-		headless: settings.headless,
-		channel: settings.channel,
-		executablePath: settings.executablePath,
-		env: settings.env,
-		proxy: settings.proxy,
-		args: ["--disable-blink-features=AutomationControlled", ...(settings.args || [])],
-		viewport: settings.viewport,
-	});
-	return [context, () => context.close()] as const;
-};
-
-export const connectBrowser = async (settings: CdpBrowserSettings) => {
-	const browser = { chromium, firefox, webkit }[settings.browserType];
-	const cdpBrowser = await browser.connectOverCDP(settings.cdpEndpoint);
-	const [context] = cdpBrowser.contexts();
-	if (!context) {
-		throw new Error("No context found in the connected browser");
+export const connectProfileBrowser = async (profile: Browser) => {
+	switch (profile.type) {
+		case "launch": {
+			const browser = { chromium, firefox, webkit }[profile.browserType];
+			const context = await browser.launchPersistentContext(profile.userDataDir, {
+				handleSIGINT: false,
+				handleSIGTERM: false,
+				handleSIGHUP: false,
+				headless: profile.headless,
+				channel: profile.channel,
+				executablePath: profile.executablePath,
+				env: profile.env,
+				proxy: profile.proxy,
+				args: ["--disable-blink-features=AutomationControlled", ...(profile.args || [])],
+				viewport: profile.viewport,
+			});
+			return [context, () => context.close()] as const;
+		}
+		case "cdp": {
+			const browser = { chromium, firefox, webkit }[profile.browserType];
+			const cdpBrowser = await browser.connectOverCDP(profile.cdpEndpoint);
+			const [context] = cdpBrowser.contexts();
+			if (!context) {
+				throw new Error("No context found in the connected browser");
+			}
+			return [context, () => cdpBrowser.close()] as const;
+		}
 	}
-	return [context, () => cdpBrowser.close()] as const;
 };

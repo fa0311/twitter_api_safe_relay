@@ -1,5 +1,6 @@
-export { default as createApp } from "./app.ts";
+export { createApp } from "./app.ts";
 export { createDashboardApp } from "./dashboard/app.ts";
-export { type StartRelayOptions, startRelay } from "./start.ts";
-export { connectBrowser, launchBrowser } from "./utils/browser.ts";
-export { loadSettings, type Settings } from "./utils/settings.ts";
+export type { AppOptions } from "./utils/app.ts";
+export { connectProfileBrowser } from "./utils/browser.ts";
+export { createProfileClients } from "./utils/profiles.ts";
+export { parseSettings, type Settings, type SettingsInput, SettingsSchema } from "./utils/settings.ts";
