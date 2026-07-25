@@ -58,8 +58,8 @@ describe("createProfileClients", () => {
 		mocks.connectProfileBrowser.mockResolvedValue([context, close]);
 		mocks.createTwitterBrowser.mockReturnValue(client);
 
-		const result = await createProfileClients(createProfile("account1"));
-		const created = await result.initialize();
+		const result = await createProfileClients();
+		const created = await result.initialize(createProfile("account1"));
 
 		expect(context.newPage).not.toHaveBeenCalled();
 		expect(mocks.createTwitterBrowser).toHaveBeenCalledWith(xPage);
@@ -80,8 +80,8 @@ describe("createProfileClients", () => {
 		mocks.connectProfileBrowser.mockResolvedValue([context, vi.fn()]);
 		mocks.createTwitterBrowser.mockReturnValue(client);
 
-		const result = await createProfileClients(createProfile("account1"));
-		await result.initialize();
+		const result = await createProfileClients();
+		await result.initialize(createProfile("account1"));
 
 		expect(context.newPage).toHaveBeenCalledOnce();
 		expect(mocks.createTwitterBrowser).toHaveBeenCalledWith(newPage);
