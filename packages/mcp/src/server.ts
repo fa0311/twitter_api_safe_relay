@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { StreamableHTTPTransport } from "@hono/mcp";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -15,6 +16,7 @@ import {
 } from "twitter-api-safe-relay/tools";
 import { assetsRoot } from "twitter-api-safe-relay-dashboard";
 import createMcpServer from "./app.ts";
+import { fetchCapture } from "./utils/catalog.ts";
 import { parseSettings } from "./utils/settings.ts";
 
 const cleanup = createCleanup();
@@ -23,9 +25,6 @@ process.once("SIGTERM", async () => {
 	await cleanup.close();
 });
 process.once("SIGINT", async () => {
-	await cleanup.close();
-});
-process.stdin.on("end", async () => {
 	await cleanup.close();
 });
 
@@ -45,6 +44,12 @@ try {
 	})();
 
 	const logger = createLogger(settings.logger);
+
+	if (settings.mcp.transport === "stdio") {
+		process.stdin.on("end", async () => {
+			await cleanup.close();
+		});
+	}
 
 	const shutdown = createShutdown();
 
@@ -78,42 +83,71 @@ try {
 
 	logger.info(`Available profiles: ${settings.profiles.map((profile) => profile.name).join(", ")}`);
 
-	const app = new Hono();
-	app.route("/", await createApp(clients));
-	if (settings.dashboard) {
+	const catalog = await fetchCapture();
+	logger.info(`Loaded ${catalog.length} recorded endpoints`);
+
+	const mountDashboard = async (app: Hono) => {
+		app.route("/", await createApp(clients));
 		app.route("/", createDashboardApp(clients));
 		app.use("/*", serveStatic({ root: assetsRoot }));
-	}
-
-	const server = serve({ fetch: app.fetch, port: settings.port });
-	await cleanup.add(async () => void server.close());
-
-	await new Promise((resolve, reject) => {
-		server.on("error", reject);
-		server.on("listening", async () => {
-			logger.info(`Server is running on http://localhost:${settings.port}`);
-			server.removeListener("error", reject);
-			resolve(undefined);
-		});
-	});
-
-	server.on("error", (error) => {
-		shutdown.error(error);
-	});
-	server.on("close", () => {
-		shutdown.close();
-	});
-
-	const mcpServer = createMcpServer(clients);
-	await cleanup.add(async () => await mcpServer.close());
-
-	mcpServer.server.onclose = () => {
-		logger.info("MCP connection closed");
-		shutdown.close();
 	};
 
-	await mcpServer.connect(new StdioServerTransport());
-	logger.info("MCP server connected over stdio");
+	const listen = async (app: Hono) => {
+		const server = serve({ fetch: app.fetch, hostname: settings.hostname, port: settings.port });
+		await cleanup.add(async () => void server.close());
+
+		await new Promise((resolve, reject) => {
+			server.on("error", reject);
+			server.on("listening", async () => {
+				logger.info(`Server is running on http://${settings.hostname}:${settings.port}`);
+				server.removeListener("error", reject);
+				resolve(undefined);
+			});
+		});
+
+		server.on("error", (error) => {
+			shutdown.error(error);
+		});
+		server.on("close", () => {
+			shutdown.close();
+		});
+	};
+
+	switch (settings.mcp.transport) {
+		case "http": {
+			const app = new Hono();
+			app.all("/mcp", async (c) => {
+				const mcpServer = createMcpServer(clients, catalog);
+				const transport = new StreamableHTTPTransport();
+				await mcpServer.connect(transport);
+				return transport.handleRequest(c);
+			});
+			if (settings.dashboard) {
+				await mountDashboard(app);
+			}
+			await listen(app);
+			logger.info(`MCP endpoint: http://${settings.hostname}:${settings.port}/mcp`);
+			break;
+		}
+		case "stdio": {
+			if (settings.dashboard) {
+				const app = new Hono();
+				await mountDashboard(app);
+				await listen(app);
+			}
+			const mcpServer = createMcpServer(clients, catalog);
+			await cleanup.add(async () => await mcpServer.close());
+
+			mcpServer.server.onclose = () => {
+				logger.info("MCP connection closed");
+				shutdown.close();
+			};
+
+			await mcpServer.connect(new StdioServerTransport());
+			logger.info("MCP server connected over stdio");
+			break;
+		}
+	}
 
 	await shutdown.wait();
 } catch (error) {

@@ -11,7 +11,7 @@ export const createLogger = (logger: Logger) => {
 				level: logger.level,
 				timestamp: pino.stdTimeFunctions.isoTime,
 			};
-			if (logger.output.prettyPrint.enabled) {
+			if (logger.output.prettyPrint) {
 				return pino(options, pinoPretty());
 			} else {
 				return pino(options);
@@ -22,7 +22,7 @@ export const createLogger = (logger: Logger) => {
 				level: logger.level,
 				timestamp: pino.stdTimeFunctions.isoTime,
 			};
-			if (logger.output.prettyPrint.enabled) {
+			if (logger.output.prettyPrint) {
 				return pino(options, pinoPretty({ destination: logger.output.filePath }));
 			} else {
 				return pino(options, pino.destination(logger.output.filePath));

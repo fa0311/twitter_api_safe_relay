@@ -2,14 +2,19 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { randomChoice } from "twitter-api-safe-relay/tools";
 import type { TwitterApiProfileClient } from "twitter-api-safe-request";
 import { z } from "zod";
+import packageJson from "../package.json" with { type: "json" };
+import type { Capture } from "./utils/catalog.ts";
 
 type AppOptions = {
 	name: string;
 	client: TwitterApiProfileClient;
 };
 
-const createMcpServer = (options: AppOptions[]) => {
-	const server = new McpServer({ name: "twitter-api-safe-mcp", version: "0.0.4" });
+const VariablesSchema = z.record(z.string(), z.json());
+
+const createMcpServer = (options: AppOptions[], catalog: Capture[]) => {
+	const server = new McpServer({ name: packageJson.name, version: packageJson.version });
+	const graphql = catalog.filter((capture) => capture.type === "graphql");
 
 	const resolveClient = (profileName?: string) => {
 		if (profileName === undefined) {
@@ -26,59 +31,143 @@ const createMcpServer = (options: AppOptions[]) => {
 		return randomChoice(filteredOptions).client;
 	};
 
+	const resolveOperation = (name: string) => {
+		const operation = graphql.find((capture) => capture.path.operationName === name);
+
+		if (operation === undefined) {
+			throw new Error(`Unknown GraphQL operation: "${name}". Use list_endpoints.`);
+		}
+
+		return operation;
+	};
+
 	server.registerTool(
 		"list_profiles",
 		{
-			description: "List the browser profile names available for Twitter/X API requests.",
+			description: "List available browser profile names.",
 			inputSchema: {},
 		},
-		async () => {
-			return { content: [{ type: "text", text: JSON.stringify({ profiles: options.map((o) => o.name) }) }] };
+		() => ({ content: [{ type: "text", text: options.map((o) => o.name).join("\n") }] }),
+	);
+
+	server.registerTool(
+		"list_endpoints",
+		{
+			description: 'GraphQL operations by name, and everything else as "METHOD path".',
+			inputSchema: {},
+		},
+		() => {
+			const lines = [
+				...new Set(
+					catalog.map((capture) =>
+						capture.type === "graphql" ? capture.path.operationName : `${capture.method} ${capture.path}`,
+					),
+				),
+			];
+			return { content: [{ type: "text", text: lines.join("\n") }] };
+		},
+	);
+
+	server.registerTool(
+		"get_endpoint",
+		{
+			description:
+				"Recorded request for a non-GraphQL path, as a template for twitter_api_request. Replace example values.",
+			inputSchema: { path: z.string().describe('Exact path from list_endpoints, e.g. "/1.1/search/typeahead.json"') },
+		},
+		({ path }) => {
+			const matches = catalog.filter((capture) => capture.type === "rest" && capture.path === path);
+			return { content: [{ type: "text", text: JSON.stringify(matches) }] };
+		},
+	);
+
+	server.registerTool(
+		"get_operation",
+		{
+			description:
+				"Example variables for a GraphQL operation. Variable keys differ per operation; never reuse keys across operations.",
+			inputSchema: { operation: z.string().describe('Operation name, e.g. "TweetDetail"') },
+		},
+		({ operation }) => {
+			const capture = resolveOperation(operation);
+			const data = (() => {
+				switch (capture.method) {
+					case "GET":
+						return { method: capture.method, variables: VariablesSchema.parse(JSON.parse(capture.params.variables)) };
+					case "POST":
+						return { method: capture.method, variables: capture.data.variables };
+				}
+			})();
+			return { content: [{ type: "text", text: JSON.stringify(data) }] };
+		},
+	);
+
+	server.registerTool(
+		"twitter_api_graphql",
+		{
+			description:
+				"Send a GraphQL request by operation name. queryId, features and fieldToggles come from the catalog; variables must be given in full.",
+			inputSchema: {
+				operation: z.string().describe('Operation name, e.g. "TweetDetail"'),
+				variables: z.record(z.string(), z.json()).describe("Every key from get_operation, with values filled in"),
+				profile: z.string().optional().describe("Random when omitted"),
+			},
+		},
+		async ({ operation, variables, profile }) => {
+			const capture = resolveOperation(operation);
+			const { queryId, operationName } = capture.path;
+
+			const result = (() => {
+				switch (capture.method) {
+					case "GET":
+						return {
+							params: {
+								variables: JSON.stringify(variables),
+								features: capture.params.features,
+								fieldToggles: capture.params.fieldToggles,
+							},
+						};
+					case "POST":
+						return {
+							data: {
+								queryId: capture.data.queryId,
+								variables: variables,
+								features: capture.data.features,
+								fieldToggles: capture.data.fieldToggles,
+							},
+						};
+				}
+			})();
+
+			const data = await resolveClient(profile).dispatch({
+				headers: capture.headers,
+				method: capture.method,
+				path: `/graphql/${queryId}/${operationName}`,
+				...result,
+			});
+			return { content: [{ type: "text", text: JSON.stringify(data) }] };
 		},
 	);
 
 	server.registerTool(
 		"twitter_api_request",
 		{
-			description: [
-				"Send a Twitter/X web API request through a logged-in browser profile.",
-				'The path is relative to https://x.com/i/api, e.g. "/graphql/<queryId>/<operationName>",',
-				'"/1.1/friends/following/list.json" or "/2/notifications/all.json".',
-				'GraphQL requests take JSON "variables" and "features" query parameters;',
-				"non-string parameter values are JSON-encoded automatically.",
-			].join(" "),
+			description: "Send a request to the Twitter API. Prefer twitter_api_graphql for GraphQL.",
 			inputSchema: {
-				method: z.enum(["GET", "POST"]).default("GET").describe("HTTP method"),
-				path: z.string().describe("API path relative to https://x.com/i/api"),
-				params: z
-					.record(z.string(), z.unknown())
-					.optional()
-					.describe("Query parameters; non-string values are JSON-encoded"),
-				body: z.unknown().optional().describe("JSON request body (POST only)"),
-				profile: z.string().optional().describe("Browser profile name; a random profile is used when omitted"),
+				method: z.enum(["GET", "POST"]).default("GET"),
+				path: z.string().describe("Relative to https://x.com/i/api"),
+				params: z.record(z.string(), z.json()).default({}).describe("Query parameters"),
+				body: z.json().optional().describe("POST only"),
+				headers: z
+					.record(z.string(), z.string())
+					.default({})
+					.describe('Set {"content-type":"application/json"} to send a JSON body'),
+				profile: z.string().optional().describe("Random when omitted"),
 			},
 		},
-		async ({ method, path, params, body, profile }) => {
-			try {
-				const client = resolveClient(profile);
-				const query = Object.fromEntries(
-					Object.entries(params ?? {}).map(([key, value]) => [
-						key,
-						typeof value === "string" ? value : JSON.stringify(value),
-					]),
-				);
-				const result = await client.dispatch({
-					headers: path.startsWith("/graphql") ? { "content-type": "application/json" } : undefined,
-					method,
-					data: method === "POST" ? body : undefined,
-					params: query,
-					path,
-				});
-				return { content: [{ type: "text", text: JSON.stringify(result) }] };
-			} catch (error) {
-				const message = error instanceof Error ? error.message : JSON.stringify(error);
-				return { content: [{ type: "text", text: message }], isError: true };
-			}
+		async ({ method, path, params, body, headers, profile }) => {
+			const result = await resolveClient(profile).dispatch({ headers, method, data: body, params, path });
+			return { content: [{ type: "text", text: JSON.stringify(result) }] };
 		},
 	);
 

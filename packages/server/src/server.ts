@@ -81,13 +81,13 @@ try {
 		app.use("/*", serveStatic({ root: assetsRoot }));
 	}
 
-	const server = serve({ fetch: app.fetch, port: settings.port });
+	const server = serve({ fetch: app.fetch, hostname: settings.hostname, port: settings.port });
 	await cleanup.add(async () => void server.close());
 
 	await new Promise((resolve, reject) => {
 		server.on("error", reject);
 		server.on("listening", async () => {
-			logger.info(`Server is running on http://localhost:${settings.port}`);
+			logger.info(`Server is running on http://${settings.hostname}:${settings.port}`);
 			logger.info(`Available profiles: ${settings.profiles.map((profile) => profile.name).join(", ")}`);
 			server.removeListener("error", reject);
 			resolve(undefined);

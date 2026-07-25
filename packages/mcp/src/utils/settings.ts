@@ -2,23 +2,19 @@ import { SettingsSchema } from "twitter-api-safe-relay";
 import { ZodParseError } from "twitter-api-safe-relay/tools";
 import z from "zod";
 
-const PrettyPrintSchema = z.strictObject({
-	enabled: z.boolean().default(true),
-});
-
-const FileLoggerSchema = z.strictObject({
-	level: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
-	output: z
-		.strictObject({
-			type: z.literal("file"),
-			prettyPrint: PrettyPrintSchema.prefault({}),
-			filePath: z.string().min(1, "File path is required"),
-		})
-		.prefault({ type: "file", filePath: "./relay.log" }),
-});
+const McpSchema = z
+	.discriminatedUnion("transport", [
+		z.strictObject({
+			transport: z.literal("stdio"),
+		}),
+		z.strictObject({
+			transport: z.literal("http"),
+		}),
+	])
+	.prefault({ transport: "stdio" });
 
 export const FileSettingsSchema = SettingsSchema.extend({
-	logger: FileLoggerSchema.prefault({}),
+	mcp: McpSchema,
 });
 
 export type SettingsInput = z.input<typeof FileSettingsSchema>;

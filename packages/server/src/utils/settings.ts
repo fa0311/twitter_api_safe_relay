@@ -45,21 +45,17 @@ const ProfileSchema = z.strictObject({
 	browser: z.discriminatedUnion("type", [LunchBrowserSchema, CdpBrowserSchema]),
 });
 
-const PrettyPrintSchema = z.strictObject({
-	enabled: z.boolean().default(true),
-});
-
 const LoggerSchema = z.strictObject({
 	level: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
 	output: z
 		.discriminatedUnion("type", [
 			z.strictObject({
 				type: z.literal("stdout"),
-				prettyPrint: PrettyPrintSchema.prefault({}),
+				prettyPrint: z.boolean().default(true),
 			}),
 			z.strictObject({
 				type: z.literal("file"),
-				prettyPrint: PrettyPrintSchema.prefault({}),
+				prettyPrint: z.boolean().default(false),
 				filePath: z.string().min(1, "File path is required"),
 			}),
 		])
@@ -67,6 +63,7 @@ const LoggerSchema = z.strictObject({
 });
 
 export const SettingsSchema = z.strictObject({
+	hostname: z.string().default("localhost"),
 	port: z.number().int().min(1).max(65535).default(3000),
 	logger: LoggerSchema.prefault({}),
 	dashboard: z.boolean().default(true),
