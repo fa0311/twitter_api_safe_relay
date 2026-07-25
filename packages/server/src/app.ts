@@ -4,7 +4,7 @@ import type { TwitterApiProfileClient } from "twitter-api-safe-request";
 import type { AppOptions } from "./utils/app.ts";
 import { randomChoice } from "./utils/random.ts";
 
-const createApp = async (options: AppOptions[]) => {
+export const createApp = async (options: AppOptions[]) => {
 	const app = new Hono();
 
 	app.get("/health", (c) => {
@@ -110,4 +110,3 @@ const createApp = async (options: AppOptions[]) => {
 
 	return app;
 };
-export default createApp;

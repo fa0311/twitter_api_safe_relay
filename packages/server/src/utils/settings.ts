@@ -45,17 +45,35 @@ const ProfileSchema = z.strictObject({
 	browser: z.discriminatedUnion("type", [LunchBrowserSchema, CdpBrowserSchema]),
 });
 
-const SettingsSchema = z.strictObject({
+const LoggerSchema = z.strictObject({
+	level: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
+	output: z
+		.discriminatedUnion("type", [
+			z.strictObject({
+				type: z.literal("stdout"),
+				prettyPrint: z.boolean().default(true),
+			}),
+			z.strictObject({
+				type: z.literal("file"),
+				prettyPrint: z.boolean().default(false),
+				filePath: z.string().min(1, "File path is required"),
+			}),
+		])
+		.prefault({ type: "stdout" }),
+});
+
+export const SettingsSchema = z.strictObject({
+	hostname: z.string().default("localhost"),
 	port: z.number().int().min(1).max(65535).default(3000),
-	logLevel: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
-	logPrettyPrint: z.boolean().default(true),
+	logger: LoggerSchema.prefault({}),
 	dashboard: z.boolean().default(true),
 	profiles: z.array(ProfileSchema).min(1, "At least one profile is required"),
 });
 
-export type Settings = z.infer<typeof SettingsSchema>;
+export type SettingsInput = z.input<typeof SettingsSchema>;
+export type Settings = z.output<typeof SettingsSchema>;
 
-export const loadSettings = (data: unknown) => {
+export const parseSettings = (data: SettingsInput) => {
 	const result = SettingsSchema.safeParse(data);
 	if (result.success) {
 		return result.data;

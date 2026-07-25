@@ -112,6 +112,7 @@ describe("defaultScriptOf", () => {
 
 		expect(script).toContain("new URLSearchParams");
 		expect(script).toContain('"user.fields": "id,name"');
+		// biome-ignore lint/suspicious/noTemplateCurlyInString: asserts the generated script contains the literal text
 		expect(script).toContain("return await fetch(`/2/users/me?${params}`");
 	});
 
