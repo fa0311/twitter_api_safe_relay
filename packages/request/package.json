@@ -1,6 +1,6 @@
 {
 	"name": "twitter-api-safe-request",
-	"version": "0.0.3",
+	"version": "0.1.0",
 	"description": "Safe request helpers for Twitter/X web API access through a Playwright profile.",
 	"repository": {
 		"type": "git",
