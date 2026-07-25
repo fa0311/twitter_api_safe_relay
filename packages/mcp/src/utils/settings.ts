@@ -11,7 +11,7 @@ const McpSchema = z
 			transport: z.literal("http"),
 		}),
 	])
-	.prefault({ transport: "stdio" });
+	.prefault({ transport: "http" });
 
 export const FileSettingsSchema = SettingsSchema.extend({
 	mcp: McpSchema,
