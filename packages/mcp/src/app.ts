@@ -18,7 +18,7 @@ const responseStore = createResponseStore(16);
 
 const INSTRUCTIONS = `Call Twitter/X's private web API (GraphQL + v1.1/v2 REST) through logged-in browser profiles.
 
-Flow: list_endpoints -> get_operation (recorded real example) -> twitter_api_request (returns a response id, never the body) -> filter_response (id + jq -> data). Infer the operation from its name.
+Flow: list_endpoints -> get_operation -> twitter_api_request -> filter_response. Infer the operation from its name.
 
 Rules:
 - Variable keys differ per operation (a tweet id is focalTweetId in TweetDetail but tweetId in Retweeters). Copy keys from get_operation and change values only; keep every key (removing keys can cause HTTP 422) and never guess keys from another operation. Opaque recorded values (controller_data etc.) are safe to resend unchanged - except a recorded "cursor", which makes the example a page-2 request: drop it to get the first page.
@@ -27,26 +27,25 @@ Rules:
 - HTTP 200 does not mean success: GraphQL failures are in the response body under "errors".
 
 Reading responses (filter_response on the id from twitter_api_request - raw responses are 100 KB+):
-- Tweet text and counts are in a "legacy" object; the author's @handle is in a separate "core" object.
+- Tweet text and counts are in a "legacy" object; the author's @handle is in a separate "core" object. User objects split the same way: screen_name and display name in "core", follower/tweet counts in "legacy".
 - Do NOT collect fields with bare ".." recursion: it also picks up pinned tweets, quoted tweets embedded in results, and @handles that merely appear in user bios. Walk the timeline entries instead - this spine works for every timeline operation, keeps those out, and preserves order:
   [.. | objects | select(.type? == "TimelineAddEntries") | .entries[] | .content | (.itemContent // .items[]?.item.itemContent)]
   Pinned tweets arrive in a separate TimelinePinEntry instruction (their entry looks like any other tweet), so the spine already excludes them - no pin filtering is needed, and none is possible at entry level.
 - Tweets (append to the spine): | select(.tweet_results?) | select(.promotedMetadata == null) | .tweet_results.result | (.tweet // .) | (.legacy.retweeted_status_result.result // .) | {text: .legacy.full_text, user: (.core.user_results.result | (.core.screen_name // .legacy.screen_name)), likes: (.legacy.favorite_count // 0), at: .legacy.created_at}
   The retweeted_status_result step expands a retweet to its original (an RT's own favorite_count is 0 and its full_text is truncated yet non-null, so a // fallback on full_text can never detect it). Drop that step only if you need the retweet wrapper itself.
 - Users (Followers/Following/People, append to the spine): | .user_results.result | select(. != null) | (.core.screen_name // .legacy.screen_name)
+- Who-engaged lookups: Retweeters and quoted_tweet_id:<id> search work (search may undercount vs the tweet's own quote_count), but Favoriters returns an empty TimelineTerminateTimeline for tweets your profile does not own - likers are private on X, so an empty list does not mean "nobody liked it".
 - promotedMetadata present = ad; keep ads out unless asked for them.
 - Project scalars only (text, counts, ids) in your jq output - one object-valued field can make the output bigger than you can read. Never put two generators in one object literal ({a: (..|...), b: (..|...)}) - jq emits their cross product, which reads as phantom extra results; select one object first, then project.
 - Pagination: fetch the page's items AND the next cursor in ONE filter_response call, then resend the request with the value as the "cursor" variable:
   {items: [<spine>...], cursor: first(.. | objects | select(.cursorType? == "Bottom") | .value)}
-  The "count" variable is only a hint - timelines return ~20 items per page no matter what you ask for.
-- jq returned [] or null? Your filter path is probably wrong, or the body holds "errors". Check .errors and inspect with [.. | objects | select(.type?) | .type] | unique before concluding "no data".
-
+  The "count" variable is only a hint - the server picks the real page size (tweet timelines ~20, user lists 50+).
 Search (SearchTimeline):
 - The "product" variable picks the tab: "Top" (ranked, usually what you want), "Latest" (reverse-chronological), "People", "Media".
 - "rawQuery" is the literal search box; the full advanced grammar works: from:user to:user since:YYYY-MM-DD until:YYYY-MM-DD min_faves:N min_retweets:N filter:media -filter:replies lang:ja "exact phrase" a OR b #tag
 - Trending on a topic = product "Top" plus an engagement floor inside rawQuery, e.g. {"rawQuery":"AI min_faves:500 lang:ja","product":"Top"}.
-- Search is fuzzy and non-deterministic: identical calls return different subsets and every operator is a hint, not a guarantee - check the returned texts/counts yourself, and confirm anything critical with TweetResultByRestId. Known bad: adding -filter:replies to a compound query can collapse it to zero or unrelated results - drop it and filter replies yourself.
-- product "Top" wraps some hits in search-conversation modules that bundle the matched tweet with reply context; the spine yields every bundled item, so drop items whose legacy.in_reply_to_status_id_str is set unless you want replies.
+- Search is fuzzy and non-deterministic: identical calls return different subsets and every operator is a hint, not a guarantee - since:/until:/min_faves all leak past their boundary, so re-check texts, counts and dates in the results yourself, and confirm anything critical with TweetResultByRestId. Known bad: adding -filter:replies to a compound query can collapse it to zero or unrelated results - drop it and filter replies yourself.
+- product "Top" wraps some hits in search-conversation modules that bundle the matched tweet with reply context; the spine yields every bundled item, so filter both ways: drop items whose legacy.in_reply_to_status_id_str is set unless you want replies, and check the author - a bundled thread root has no reply marker and can belong to a different user, so even a from:X search returns other people's tweets.
 
 Writes (create/delete tweet, follow, like, bookmark, ...):
 - Confirm with the user before any side-effecting call. POST alone does not mean write: HomeTimeline is a POST read.
@@ -106,7 +105,7 @@ const createMcpServer = (options: AppOptions[], catalog: Capture[]) => {
 		"get_operation",
 		{
 			description:
-				"Recorded real example for an endpoint, in the exact shape twitter_api_request accepts — copy it and change only the values you need. Variable keys differ per operation. Multiple lines are multiple recorded variants.",
+				"Recorded real example for an endpoint, in the exact shape twitter_api_request accepts. Multiple lines are multiple recorded variants.",
 			inputSchema: { path: z.string().describe("A line from list_endpoints, verbatim") },
 		},
 		({ path }) => {
@@ -152,7 +151,7 @@ const createMcpServer = (options: AppOptions[], catalog: Capture[]) => {
 		"twitter_api_request",
 		{
 			description:
-				"Call an endpoint and return a response id (never the body - read it with filter_response). GraphQL: send {variables: {...}} in params (GET) or data (POST), exactly as shaped by get_operation; queryId/features/fieldToggles are auto-filled. REST: copy params/data from get_operation. Paths not in the catalog are sent as-is.",
+				"Call an endpoint and return a response id (never the body - read it with filter_response). GraphQL: send {variables: {...}} in params (GET) or data (POST). REST: copy params/data from get_operation. Paths not in the catalog are sent as-is.",
 			inputSchema: {
 				method: z.enum(["GET", "POST"]).default("GET").describe("Only used when `path` is not in the catalog"),
 				path: z
@@ -216,7 +215,7 @@ const createMcpServer = (options: AppOptions[], catalog: Capture[]) => {
 			const result = await resolveClient(request.profile).dispatch(data);
 			const id = responseStore.add(result);
 
-			return { content: [{ type: "text", text: `id:${id}` }] };
+			return { content: [{ type: "text", text: id }] };
 		},
 	);
 
@@ -224,7 +223,7 @@ const createMcpServer = (options: AppOptions[], catalog: Capture[]) => {
 		"filter_response",
 		{
 			description:
-				"Apply a jq filter to a stored response and return the result - the only way to read a twitter_api_request response. Raw responses are 100 KB+, so filter down to what you need. Re-call freely with different filters on the same id; NEVER resend a request just to re-extract.",
+				"Apply a jq filter to a stored response and return the result - the only way to read a twitter_api_request response. Re-call freely with different filters on the same id.",
 			inputSchema: {
 				id: z.string().describe("A response id returned by twitter_api_request"),
 				jq: z.string().describe("jq filter applied to the stored raw response"),
@@ -235,7 +234,12 @@ const createMcpServer = (options: AppOptions[], catalog: Capture[]) => {
 
 			if (stored === undefined) {
 				return {
-					content: [{ type: "text", text: `Unknown id: ${id}.` }],
+					content: [
+						{
+							type: "text",
+							text: `Unknown id: ${id}. Ids expire as newer responses fill the store.`,
+						},
+					],
 					isError: true,
 				};
 			}
