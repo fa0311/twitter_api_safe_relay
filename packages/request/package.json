@@ -4,7 +4,7 @@
 	"description": "Safe request helpers for Twitter/X web API access through a Playwright profile.",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/fa0311/twitter_api_safe_proxy.git",
+		"url": "git+https://github.com/fa0311/twitter_api_safe_relay.git",
 		"directory": "packages/request"
 	},
 	"type": "module",

@@ -4,7 +4,7 @@
 	"description": "Minimal WXT bridge for the Twitter/X Web App API client.",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/fa0311/twitter_api_safe_proxy.git",
+		"url": "git+https://github.com/fa0311/twitter_api_safe_relay.git",
 		"directory": "packages/wxt"
 	},
 	"type": "module",
