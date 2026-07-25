@@ -2,12 +2,13 @@
 
 `twitter-api-safe` is a TypeScript monorepo for sending Twitter/X Web App API requests through a logged-in browser.
 
-The workspace contains four main entry points:
+The workspace contains five main entry points:
 
-- `twitter-api-safe-inject`: the canonical MAIN-world `setup.js` asset shared by Playwright and browser extensions.
-- `twitter-api-safe-request`: an npm package you can use directly from your own Playwright code.
-- `twitter-api-safe-wxt`: a WXT adapter for browser extensions.
-- `twitter-api-safe-relay`: an HTTP relay server that wraps `twitter-api-safe-request`.
+- [`twitter-api-safe-inject`](https://www.npmjs.com/package/twitter-api-safe-inject): the canonical MAIN-world `setup.js` asset shared by Playwright and browser extensions.
+- [`twitter-api-safe-request`](https://www.npmjs.com/package/twitter-api-safe-request): an npm package you can use directly from your own Playwright code.
+- [`twitter-api-safe-wxt`](https://www.npmjs.com/package/twitter-api-safe-wxt): a WXT adapter for browser extensions.
+- [`twitter-api-safe-relay`](https://www.npmjs.com/package/twitter-api-safe-relay): an HTTP relay server that wraps `twitter-api-safe-request`.
+- [`twitter-api-safe-mcp`](https://www.npmjs.com/package/twitter-api-safe-mcp): an MCP server that runs the relay and serves MCP in a single process.
 
 The core idea is simple: X.com already has an authenticated Web App API client running in the browser. This project injects a small bridge into that page and lets requests run through that live client instead of reimplementing cookies, CSRF handling, auth state, feature flags, and request behavior in Node.js.
 
@@ -16,7 +17,9 @@ flowchart LR
 	app["Your Node.js app"]
 	extension["WXT browser extension"]
 	curl["HTTP client"]
+	agent["AI agent (MCP client)"]
 	server["twitter-api-safe-relay"]
+	mcp["twitter-api-safe-mcp"]
 	package["twitter-api-safe-request"]
 	wxt["twitter-api-safe-wxt"]
 	xclient["X Web App<br/>internal API client"]
@@ -24,7 +27,9 @@ flowchart LR
 	app -->|"call package"|package
 	extension -->|"call package"|wxt
 	curl -->|"HTTP request"|server
+	agent -->|"MCP"|mcp
 	server -->|"call package"|package
+	mcp -->|"call package"|package
 	package -->|"browser bridge"|xclient
 	wxt -->|"MAIN world bridge"|xclient
 ```
@@ -103,6 +108,8 @@ export default defineContentScript({
 
 Package README: [`packages/wxt/README.md`](packages/wxt/README.md)
 
+npm package page: [`twitter-api-safe-wxt`](https://www.npmjs.com/package/twitter-api-safe-wxt)
+
 Runnable example: [`examples/basic`](examples/basic)
 
 ## Use the HTTP relay
@@ -126,6 +133,20 @@ curl 'http://localhost:3000/i/api/graphql/gKia-nBM9kwuDEfSDeWMfQ/HomeTimeline'
 
 Server README: [`packages/server/README.md`](packages/server/README.md)
 
+npm package page: [`twitter-api-safe-relay`](https://www.npmjs.com/package/twitter-api-safe-relay)
+
+## Use from AI agents (MCP)
+
+`twitter-api-safe-mcp` runs the full relay server (HTTP API + dashboard) and serves MCP in a single process. It exposes `list_profiles` and `twitter_api_request` tools.
+
+```sh
+claude mcp add twitter-api-safe -- pnpx twitter-api-safe-mcp ./settings.json
+```
+
+Package README: [`packages/mcp/README.md`](packages/mcp/README.md)
+
+npm package page: [`twitter-api-safe-mcp`](https://www.npmjs.com/package/twitter-api-safe-mcp)
+
 ## Use from AI agents (Agent Skills)
 
 [`twitter_api_safe_relay_skills`](https://github.com/fa0311/twitter_api_safe_relay_skills) provides Agent Skills for Claude Code and other agents, letting an AI turn natural-language instructions into relay-server GraphQL / v1.1 calls and summarize the results.
@@ -143,7 +164,9 @@ Configure the relay in the workspace-level `settings.json`.
 ```json
 {
   "port": 3000,
-  "logLevel": "info",
+  "logger": {
+    "level": "info"
+  },
   "profiles": [
     {
       "name": "account1",
@@ -164,15 +187,27 @@ Each profile uses either:
 
 ## Docker
 
-The compose example in [`docker/`](docker/) runs the relay with the debug dashboard enabled, using an external Chromium browser over CDP.
+Images are published to `ghcr.io/fa0311/twitter_api_safe_relay`. Every image has two tags: `latest-<name>` and `<version>-<name>`, where `<version>` is the npm package version (for `init-profile`, a build hash instead).
+
+| Tag (`<name>`)  | Contents                                                                              |
+| --------------- | ------------------------------------------------------------------------------------- |
+| `relay`         | Relay server with bundled Chromium, for `launch` profiles.                            |
+| `relay-slim`    | Relay server without a browser, for `cdp` profiles connecting to an external browser. |
+| `relay-firefox` | Relay server with bundled Firefox.                                                    |
+| `relay-webkit`  | Relay server with bundled WebKit.                                                     |
+| `mcp`           | MCP server (runs the relay + MCP) with bundled Chromium.                              |
+| `mcp-slim`      | MCP server without a browser, for `cdp` profiles connecting to an external browser.   |
+| `mcp-firefox`   | MCP server with bundled Firefox.                                                      |
+| `mcp-webkit`    | MCP server with bundled WebKit.                                                       |
+| `init-profile`  | Helper that resets lock files and permissions on the browser profile volume.          |
+
+The compose example in [`docker/`](docker/) runs the relay with the debug dashboard enabled, using `relay-slim` connected over CDP to a [kasmweb](https://hub.docker.com/r/kasmweb/chrome) Chromium container, with `init-profile` preparing the shared profile volume.
 
 ```sh
 docker compose -f docker/docker-compose.yml up
 ```
 
 Open the browser UI at `http://localhost:6901`, sign in to X/Twitter, then call the relay or dashboard on `http://localhost:6900`.
-
-Use `slim` tags when connecting to an external browser over CDP; use browser-specific tags when the container should launch that browser itself.
 
 ## Local development
 

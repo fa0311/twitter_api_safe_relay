@@ -1,6 +1,8 @@
 {
   "port": 3000,
-  "logLevel": "info",
+  "logger": {
+    "level": "info"
+  },
   "profiles": [
     {
       "name": "account1",

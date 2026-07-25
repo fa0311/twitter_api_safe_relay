@@ -68,6 +68,7 @@ export const SettingsSchema = z.strictObject({
 	logger: LoggerSchema.prefault({}),
 	dashboard: z.boolean().default(true),
 	profiles: z.array(ProfileSchema).min(1, "At least one profile is required"),
+	mcp: z.unknown().optional(),
 });
 
 export type SettingsInput = z.input<typeof SettingsSchema>;

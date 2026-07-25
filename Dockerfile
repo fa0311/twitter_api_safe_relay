@@ -12,6 +12,17 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm build
 
+FROM node:24-bookworm AS prod-deps
+
+WORKDIR /app
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+RUN corepack enable
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY --parents packages/*/package.json ./
+
+RUN pnpm install --frozen-lockfile --prod
+
 FROM node:24-bookworm-slim AS runtime-base
 
 WORKDIR /app
@@ -25,7 +36,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/settings.json ./settings.json
 
@@ -53,19 +64,43 @@ WORKDIR /app
 
 FROM runtime AS relay
 
-CMD ["node", "packages/server/dist/server.js", "./settings.json"]
+ENTRYPOINT ["node", "packages/server/dist/server.js"]
+CMD ["./settings.json"]
 
 FROM runtime-base AS relay-slim
 
-CMD ["node", "packages/server/dist/server.js", "./settings.json"]
+ENTRYPOINT ["node", "packages/server/dist/server.js"]
+CMD ["./settings.json"]
 
 FROM runtime-firefox AS relay-firefox
 
-CMD ["node", "packages/server/dist/server.js", "./settings.json"]
+ENTRYPOINT ["node", "packages/server/dist/server.js"]
+CMD ["./settings.json"]
 
 FROM runtime-webkit AS relay-webkit
 
-CMD ["node", "packages/server/dist/server.js", "./settings.json"]
+ENTRYPOINT ["node", "packages/server/dist/server.js"]
+CMD ["./settings.json"]
+
+FROM runtime AS mcp
+
+ENTRYPOINT ["node", "packages/mcp/dist/server.js"]
+CMD ["./settings.json"]
+
+FROM runtime-base AS mcp-slim
+
+ENTRYPOINT ["node", "packages/mcp/dist/server.js"]
+CMD ["./settings.json"]
+
+FROM runtime-firefox AS mcp-firefox
+
+ENTRYPOINT ["node", "packages/mcp/dist/server.js"]
+CMD ["./settings.json"]
+
+FROM runtime-webkit AS mcp-webkit
+
+ENTRYPOINT ["node", "packages/mcp/dist/server.js"]
+CMD ["./settings.json"]
 
 FROM alpine AS init-profile
 
