@@ -21,6 +21,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - target: init-profile
+            suffix: init-profile
           - target: relay
             suffix: relay
             version_path: packages/server
@@ -33,8 +35,18 @@ jobs:
           - target: relay-webkit
             suffix: relay-webkit
             version_path: packages/server
-          - target: init-profile
-            suffix: init-profile
+          - target: mcp
+            suffix: mcp
+            version_path: packages/mcp
+          - target: mcp-slim
+            suffix: mcp-slim
+            version_path: packages/mcp
+          - target: mcp-firefox
+            suffix: mcp-firefox
+            version_path: packages/mcp
+          - target: mcp-webkit
+            suffix: mcp-webkit
+            version_path: packages/mcp
 
     steps:
       - name: Checkout

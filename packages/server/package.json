@@ -1,6 +1,6 @@
 {
 	"name": "twitter-api-safe-relay",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "HTTP relay server for safe Twitter/X web API requests through Playwright profiles.",
 	"repository": {
 		"type": "git",
