@@ -13,6 +13,7 @@ import { createDefaultSettings, loadCliSettings } from "./utils/cli.ts";
 import { catchError } from "./utils/error.ts";
 import { createProfileClients } from "./utils/profiles.ts";
 import { parseSettings } from "./utils/settings.ts";
+import { createShutdown } from "./utils/shutdown.ts";
 
 const cleanup = createCleanup();
 
@@ -40,18 +41,19 @@ try {
 
 	const logger = createLogger(settings.logger);
 
+	const shutdown = createShutdown();
+
 	const clients = await Promise.all(
 		settings.profiles.map(async (profile) => {
 			const { close, emitter, initialize } = await createProfileClients();
-			const promise = Promise.withResolvers();
 			await cleanup.add(close);
 			emitter.on("error", ({ profileName, error }) => {
 				logger.error(`Error occurred for profile "${profileName}": ${error}`);
-				promise.reject(error);
+				shutdown.error(error);
 			});
 			emitter.on("close", async ({ profileName }) => {
 				logger.info(`Browser closed for profile "${profileName}"`);
-				promise.resolve(undefined);
+				shutdown.close();
 			});
 			emitter.on("reload", ({ profileName }) => {
 				logger.info(`Page reloaded for profile "${profileName}"`);
@@ -66,7 +68,7 @@ try {
 			const client = await initialize(profile);
 			logger.info(`Browser for profile "${profile.name}" launched successfully`);
 
-			return { name: profile.name, client, promise };
+			return { name: profile.name, client };
 		}),
 	);
 
@@ -92,16 +94,14 @@ try {
 		});
 	});
 
-	const serverPromise = new Promise((resolve, reject) => {
-		server.on("error", (error) => {
-			reject(error);
-		});
-		server.on("close", () => {
-			resolve(undefined);
-		});
+	server.on("error", (error) => {
+		shutdown.error(error);
+	});
+	server.on("close", () => {
+		shutdown.close();
 	});
 
-	await Promise.race([...clients.map((client) => client.promise), serverPromise]);
+	await shutdown.wait();
 } catch (error) {
 	console.error(catchError(error));
 	process.exitCode = 1;

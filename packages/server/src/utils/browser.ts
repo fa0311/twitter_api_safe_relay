@@ -8,6 +8,9 @@ export const connectProfileBrowser = async (profile: Browser) => {
 		case "launch": {
 			const browser = { chromium, firefox, webkit }[profile.browserType];
 			const context = await browser.launchPersistentContext(profile.userDataDir, {
+				handleSIGINT: false,
+				handleSIGTERM: false,
+				handleSIGHUP: false,
 				headless: profile.headless,
 				channel: profile.channel,
 				executablePath: profile.executablePath,

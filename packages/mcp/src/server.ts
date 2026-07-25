@@ -5,14 +5,15 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { Hono } from "hono";
 import { createApp, createDashboardApp, createProfileClients } from "twitter-api-safe-relay";
-import { assetsRoot } from "twitter-api-safe-relay-dashboard";
 import {
 	catchError,
 	createCleanup,
 	createDefaultSettings,
 	createLogger,
+	createShutdown,
 	loadCliSettings,
 } from "twitter-api-safe-relay/tools";
+import { assetsRoot } from "twitter-api-safe-relay-dashboard";
 import createMcpServer from "./app.ts";
 import { parseSettings } from "./utils/settings.ts";
 
@@ -22,6 +23,9 @@ process.once("SIGTERM", async () => {
 	await cleanup.close();
 });
 process.once("SIGINT", async () => {
+	await cleanup.close();
+});
+process.stdin.on("end", async () => {
 	await cleanup.close();
 });
 
@@ -42,18 +46,19 @@ try {
 
 	const logger = createLogger(settings.logger);
 
+	const shutdown = createShutdown();
+
 	const clients = await Promise.all(
 		settings.profiles.map(async (profile) => {
 			const { close, emitter, initialize } = await createProfileClients();
-			const promise = Promise.withResolvers();
 			await cleanup.add(close);
 			emitter.on("error", ({ profileName, error }) => {
 				logger.error(`Error occurred for profile "${profileName}": ${error}`);
-				promise.reject(error);
+				shutdown.error(error);
 			});
 			emitter.on("close", async ({ profileName }) => {
 				logger.info(`Browser closed for profile "${profileName}"`);
-				promise.resolve(undefined);
+				shutdown.close();
 			});
 			emitter.on("reload", ({ profileName }) => {
 				logger.info(`Page reloaded for profile "${profileName}"`);
@@ -67,8 +72,7 @@ try {
 
 			const client = await initialize(profile);
 			logger.info(`Browser for profile "${profile.name}" launched successfully`);
-
-			return { name: profile.name, client, promise };
+			return { name: profile.name, client };
 		}),
 	);
 
@@ -93,29 +97,25 @@ try {
 		});
 	});
 
-	const serverPromise = new Promise((resolve, reject) => {
-		server.on("error", (error) => {
-			reject(error);
-		});
-		server.on("close", () => {
-			resolve(undefined);
-		});
+	server.on("error", (error) => {
+		shutdown.error(error);
+	});
+	server.on("close", () => {
+		shutdown.close();
 	});
 
 	const mcpServer = createMcpServer(clients);
 	await cleanup.add(async () => await mcpServer.close());
 
-	const mcpPromise = new Promise((resolve) => {
-		mcpServer.server.onclose = () => {
-			logger.info("MCP connection closed");
-			resolve(undefined);
-		};
-	});
+	mcpServer.server.onclose = () => {
+		logger.info("MCP connection closed");
+		shutdown.close();
+	};
 
 	await mcpServer.connect(new StdioServerTransport());
 	logger.info("MCP server connected over stdio");
 
-	await Promise.race([...clients.map((client) => client.promise), serverPromise, mcpPromise]);
+	await shutdown.wait();
 } catch (error) {
 	console.error(catchError(error));
 	process.exitCode = 1;
