@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { once } from "node:events";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
@@ -16,12 +17,13 @@ import { parseSettings } from "./utils/settings.ts";
 import { createShutdown } from "./utils/shutdown.ts";
 
 const cleanup = createCleanup();
+const shutdown = createShutdown();
 
-process.once("SIGTERM", async () => {
-	await cleanup.close();
+process.once("SIGTERM", () => {
+	shutdown.close();
 });
-process.once("SIGINT", async () => {
-	await cleanup.close();
+process.once("SIGINT", () => {
+	shutdown.close();
 });
 
 try {
@@ -41,8 +43,6 @@ try {
 
 	const logger = createLogger(settings.logger);
 
-	const shutdown = createShutdown();
-
 	const clients = await Promise.all(
 		settings.profiles.map(async (profile) => {
 			const { close, emitter, initialize } = await createProfileClients();
@@ -51,9 +51,9 @@ try {
 				logger.error(`Error occurred for profile "${profileName}": ${error}`);
 				shutdown.error(error);
 			});
-			emitter.on("close", async ({ profileName }) => {
+			emitter.on("close", ({ profileName }) => {
 				logger.info(`Browser closed for profile "${profileName}"`);
-				shutdown.close();
+				shutdown.error(new Error(`Browser unexpectedly closed for profile "${profileName}"`));
 			});
 			emitter.on("reload", ({ profileName }) => {
 				logger.info(`Page reloaded for profile "${profileName}"`);
@@ -82,15 +82,13 @@ try {
 	}
 
 	const server = serve({ fetch: app.fetch, hostname: settings.hostname, port: settings.port });
-	await cleanup.add(async () => void server.close());
 
-	await new Promise((resolve, reject) => {
-		server.on("error", reject);
-		server.on("listening", async () => {
-			logger.info(`Server is running on http://${settings.hostname}:${settings.port}`);
-			logger.info(`Available profiles: ${settings.profiles.map((profile) => profile.name).join(", ")}`);
-			server.removeListener("error", reject);
-			resolve(undefined);
+	await once(server, "listening");
+	logger.info(`Server is running on http://${settings.hostname}:${settings.port}`);
+
+	await cleanup.add(() => {
+		return new Promise<void>((resolve, reject) => {
+			server.close((error) => (error ? reject(error) : resolve()));
 		});
 	});
 
@@ -106,5 +104,10 @@ try {
 	console.error(catchError(error));
 	process.exitCode = 1;
 } finally {
-	await cleanup.close();
+	try {
+		await cleanup.close();
+	} catch (error) {
+		console.error(catchError(error));
+		process.exitCode = 1;
+	}
 }

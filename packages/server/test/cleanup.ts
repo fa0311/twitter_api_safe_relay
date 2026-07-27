@@ -27,14 +27,14 @@ describe("createCleanup", () => {
 		expect(fn).toHaveBeenCalledTimes(1);
 	});
 
-	it("closes even when a handler rejects", async () => {
+	it("runs remaining handlers and throws AggregateError when a handler rejects", async () => {
 		const cleanup = createCleanup();
 		const fn = vi.fn(async () => {});
 		await cleanup.add(async () => {
 			throw new Error("boom");
 		});
 		await cleanup.add(fn);
-		await cleanup.close();
+		await expect(cleanup.close()).rejects.toThrow(AggregateError);
 		expect(fn).toHaveBeenCalledTimes(1);
 	});
 });
