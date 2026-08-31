@@ -1,6 +1,6 @@
 {
 	"name": "twitter-api-safe-inject",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "Injectable MAIN-world setup script for discovering the Twitter/X Web App API client.",
 	"repository": {
 		"type": "git",

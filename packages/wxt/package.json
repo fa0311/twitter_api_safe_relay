@@ -1,6 +1,6 @@
 {
 	"name": "twitter-api-safe-wxt",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "Minimal WXT bridge for the Twitter/X Web App API client.",
 	"repository": {
 		"type": "git",

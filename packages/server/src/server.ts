@@ -8,7 +8,7 @@ import { assetsRoot } from "twitter-api-safe-relay-dashboard";
 import { createApp } from "./app.ts";
 import { createDashboardApp } from "./index.ts";
 
-import { createFatalLogger, createLogger } from "./tools.ts";
+import { catchError, createFatalLogger, createLogger } from "./tools.ts";
 import { createCleanup } from "./utils/cleanup.ts";
 import { createDefaultSettings, loadCliSettings } from "./utils/cli.ts";
 import { createProfileClients } from "./utils/profiles.ts";
@@ -42,7 +42,14 @@ try {
 	})();
 
 	const logger = createLogger(settings.logger);
-	fatalLogger.set((message) => logger.error(message));
+	switch (settings.logger.output.type) {
+		case "file":
+			fatalLogger.set((message) => logger.error(message));
+			break;
+		case "stdout":
+			fatalLogger.set((message) => logger.error(catchError(message)));
+			break;
+	}
 
 	const clients = await Promise.all(
 		settings.profiles.map(async (profile) => {
