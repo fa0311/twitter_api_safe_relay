@@ -1,6 +1,6 @@
 {
 	"name": "twitter-api-safe-relay-dashboard",
-	"version": "0.1.1",
+	"version": "0.2.0",
 	"description": "Vite dashboard UI for inspecting Twitter/X web API requests captured through twitter-api-safe-request.",
 	"repository": {
 		"type": "git",
