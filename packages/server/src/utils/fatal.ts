@@ -1,5 +1,3 @@
-import { catchError } from "./error.ts";
-
 export const createFatalLogger = () => {
 	let logger = console.error;
 
@@ -8,7 +6,7 @@ export const createFatalLogger = () => {
 			logger = error;
 		},
 		fatal: (error: any) => {
-			logger(catchError(error));
+			logger(error);
 			process.exitCode = 1;
 		},
 	};

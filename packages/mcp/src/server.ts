@@ -8,6 +8,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { Hono } from "hono";
 import { createApp, createDashboardApp, createProfileClients } from "twitter-api-safe-relay";
 import {
+	catchError,
 	createCleanup,
 	createDefaultSettings,
 	createFatalLogger,
@@ -47,7 +48,14 @@ try {
 	})();
 
 	const logger = createLogger(settings.logger);
-	fatalLogger.set((message) => logger.error(message));
+	switch (settings.logger.output.type) {
+		case "file":
+			fatalLogger.set((message) => logger.error(message));
+			break;
+		case "stdout":
+			fatalLogger.set((message) => logger.error(catchError(message)));
+			break;
+	}
 
 	if (settings.mcp.transport === "stdio") {
 		process.stdin.once("end", () => {
