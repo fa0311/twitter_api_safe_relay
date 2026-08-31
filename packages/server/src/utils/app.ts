@@ -1,6 +1,6 @@
-import type { TwitterApiProfileClient } from "twitter-api-safe-request";
+import type { ProfileClientGetter } from "./profiles.ts";
 
 export type AppOptions = {
 	name: string;
-	client: TwitterApiProfileClient;
+	getClient: ProfileClientGetter;
 };

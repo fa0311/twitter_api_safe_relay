@@ -29,7 +29,8 @@ const createProfile = (name: string, url = "https://x.com/home"): Profile => ({
 	},
 });
 
-const createPage = (url: string) => ({ url: vi.fn(() => url), on: vi.fn() }) as unknown as Page;
+const createPage = (url: string) =>
+	({ url: vi.fn(() => url), on: vi.fn(), goto: vi.fn(async () => undefined) }) as unknown as Page;
 
 const createContext = (pages: Page[], newPage: Page) =>
 	({
@@ -59,14 +60,17 @@ describe("createProfileClients", () => {
 		mocks.createTwitterBrowser.mockReturnValue(client);
 
 		const result = await createProfileClients();
-		const created = await result.initialize(createProfile("account1"));
+		const getClient = await result.initialize(createProfile("account1"));
 
 		expect(context.newPage).not.toHaveBeenCalled();
 		expect(mocks.createTwitterBrowser).toHaveBeenCalledWith(xPage);
 		expect(client.inject).toHaveBeenCalledOnce();
+		// lazy: no navigation until the first use
+		expect(client.goto).not.toHaveBeenCalled();
+
+		expect(await getClient()).toBe(client);
 		expect(client.goto).toHaveBeenCalledWith("https://x.com/home");
 		expect(client.inject.mock.invocationCallOrder[0]!).toBeLessThan(client.goto.mock.invocationCallOrder[0]!);
-		expect(created).toBe(client);
 
 		expect(close).not.toHaveBeenCalled();
 		await result.close();

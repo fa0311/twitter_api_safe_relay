@@ -8,16 +8,16 @@ import { assetsRoot } from "twitter-api-safe-relay-dashboard";
 import { createApp } from "./app.ts";
 import { createDashboardApp } from "./index.ts";
 
-import { createLogger } from "./tools.ts";
+import { createFatalLogger, createLogger } from "./tools.ts";
 import { createCleanup } from "./utils/cleanup.ts";
 import { createDefaultSettings, loadCliSettings } from "./utils/cli.ts";
-import { catchError } from "./utils/error.ts";
 import { createProfileClients } from "./utils/profiles.ts";
 import { parseSettings } from "./utils/settings.ts";
 import { createShutdown } from "./utils/shutdown.ts";
 
-const cleanup = createCleanup();
+const cleanup = createCleanup({ reuse: false });
 const shutdown = createShutdown();
+const fatalLogger = createFatalLogger();
 
 process.once("SIGTERM", () => {
 	shutdown.close();
@@ -42,6 +42,7 @@ try {
 	})();
 
 	const logger = createLogger(settings.logger);
+	fatalLogger.set((message) => logger.error(message));
 
 	const clients = await Promise.all(
 		settings.profiles.map(async (profile) => {
@@ -53,7 +54,6 @@ try {
 			});
 			emitter.on("close", ({ profileName }) => {
 				logger.info(`Browser closed for profile "${profileName}"`);
-				shutdown.error(new Error(`Browser unexpectedly closed for profile "${profileName}"`));
 			});
 			emitter.on("reload", ({ profileName }) => {
 				logger.info(`Page reloaded for profile "${profileName}"`);
@@ -65,10 +65,10 @@ try {
 				logger.error(`Page error occurred for profile "${profileName}": ${error}`);
 			});
 
-			const client = await initialize(profile);
-			logger.info(`Browser for profile "${profile.name}" launched successfully`);
+			const getClient = await initialize(profile);
+			logger.info(`Profile "${profile.name}" initialized`);
 
-			return { name: profile.name, client };
+			return { name: profile.name, getClient };
 		}),
 	);
 
@@ -101,13 +101,11 @@ try {
 
 	await shutdown.wait();
 } catch (error) {
-	console.error(catchError(error));
-	process.exitCode = 1;
+	fatalLogger.fatal(error);
 } finally {
 	try {
 		await cleanup.close();
 	} catch (error) {
-		console.error(catchError(error));
-		process.exitCode = 1;
+		fatalLogger.fatal(error);
 	}
 }

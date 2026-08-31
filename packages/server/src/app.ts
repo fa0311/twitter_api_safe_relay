@@ -16,18 +16,18 @@ export const createApp = async (options: AppOptions[]) => {
 	});
 
 	// Middleware: resolve client for all API routes
-	const withClient = (c: Context, handler: (client: TwitterApiProfileClient) => Promise<Response>) => {
+	const withClient = async (c: Context, handler: (client: TwitterApiProfileClient) => Promise<Response>) => {
 		const profileName = c.req.header("x-profile-name");
 		const profileNames = options.map((o) => o.name);
 
 		if (profileName === undefined) {
-			return handler(randomChoice(options).client);
+			return handler(await randomChoice(options).getClient());
 		}
 
 		const filteredOptions = options.filter((o) => o.name === profileName);
 
 		if (filteredOptions.length > 0) {
-			return handler(randomChoice(filteredOptions).client);
+			return handler(await randomChoice(filteredOptions).getClient());
 		}
 
 		return c.json({ error: `Unknown profile: "${profileName}"`, available: profileNames }, 400);

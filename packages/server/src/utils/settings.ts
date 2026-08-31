@@ -42,6 +42,7 @@ const ProfileSchema = z.strictObject({
 	name: z.string().min(1, "Profile name is required"),
 	home: HomeSchema.prefault({}),
 	pageReloadIntervalMinutes: z.number().int().min(1).max(MAX_TIMER_INTERVAL_MINUTES).optional(),
+	pageIdleTimeoutMinutes: z.number().int().min(1).max(MAX_TIMER_INTERVAL_MINUTES).optional(),
 	browser: z.discriminatedUnion("type", [LunchBrowserSchema, CdpBrowserSchema]),
 });
 

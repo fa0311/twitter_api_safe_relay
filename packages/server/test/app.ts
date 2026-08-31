@@ -28,7 +28,7 @@ describe("someFunction", () => {
 		await client.inject();
 		await client.goto("https://x.com/home");
 
-		const app = await createApp([{ name: "mock", client }]);
+		const app = await createApp([{ name: "mock", getClient: async () => client }]);
 		integration.cleanup(async () => {
 			await close();
 		});

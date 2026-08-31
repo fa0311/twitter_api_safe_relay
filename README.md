@@ -182,7 +182,7 @@ Configure the relay in the workspace-level `settings.json`.
 
 Each profile uses either:
 
-- `launch`: Playwright opens a persistent browser profile. Sign in to X/Twitter on first launch.
+- `launch`: Playwright opens a persistent browser profile. The browser starts on the first request; sign in to X/Twitter when it opens.
 - `cdp`: the relay connects to an already-running Chromium browser over the Chrome DevTools Protocol.
 
 ## Docker
