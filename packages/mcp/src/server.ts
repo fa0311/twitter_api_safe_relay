@@ -8,9 +8,9 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { Hono } from "hono";
 import { createApp, createDashboardApp, createProfileClients } from "twitter-api-safe-relay";
 import {
-	catchError,
 	createCleanup,
 	createDefaultSettings,
+	createFatalLogger,
 	createLogger,
 	createShutdown,
 	loadCliSettings,
@@ -20,8 +20,9 @@ import createMcpServer from "./app.ts";
 import { fetchCapture } from "./utils/catalog.ts";
 import { parseSettings } from "./utils/settings.ts";
 
-const cleanup = createCleanup();
+const cleanup = createCleanup({ reuse: false });
 const shutdown = createShutdown();
+const fatalLogger = createFatalLogger();
 
 process.once("SIGTERM", () => {
 	shutdown.close();
@@ -46,6 +47,7 @@ try {
 	})();
 
 	const logger = createLogger(settings.logger);
+	fatalLogger.set((message) => logger.error(message));
 
 	if (settings.mcp.transport === "stdio") {
 		process.stdin.once("end", () => {
@@ -63,7 +65,6 @@ try {
 			});
 			emitter.on("close", ({ profileName }) => {
 				logger.info(`Browser closed for profile "${profileName}"`);
-				shutdown.error(new Error(`Browser unexpectedly closed for profile "${profileName}"`));
 			});
 			emitter.on("reload", ({ profileName }) => {
 				logger.info(`Page reloaded for profile "${profileName}"`);
@@ -75,9 +76,9 @@ try {
 				logger.error(`Page error occurred for profile "${profileName}": ${error}`);
 			});
 
-			const client = await initialize(profile);
-			logger.info(`Browser for profile "${profile.name}" launched successfully`);
-			return { name: profile.name, client };
+			const getClient = await initialize(profile);
+			logger.info(`Profile "${profile.name}" initialized`);
+			return { name: profile.name, getClient };
 		}),
 	);
 
@@ -150,13 +151,11 @@ try {
 
 	await shutdown.wait();
 } catch (error) {
-	console.error(catchError(error));
-	process.exitCode = 1;
+	fatalLogger.fatal(error);
 } finally {
 	try {
 		await cleanup.close();
 	} catch (error) {
-		console.error(catchError(error));
-		process.exitCode = 1;
+		fatalLogger.fatal(error);
 	}
 }

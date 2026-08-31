@@ -34,7 +34,12 @@ const DebugDialog = ({ onClose }: { onClose: () => void }) => {
 
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
-			<button aria-label="Close" className="absolute inset-0 h-full w-full bg-black/40" type="button" onClick={onClose} />
+			<button
+				aria-label="Close"
+				className="absolute inset-0 h-full w-full bg-black/40"
+				type="button"
+				onClick={onClose}
+			/>
 			<div className="relative w-full max-w-lg rounded-lg border border-[#d9e0ea] bg-white shadow-xl">
 				<div className="border-[#e7ebf1] border-b px-5 py-4">
 					<div className="font-bold text-[15px]">Enable debug capture?</div>
@@ -83,9 +88,12 @@ export const DebugControl = () => {
 	// Debug may already be enabled on the server. Check first, and only prompt
 	// automatically if it is still off — almost nothing works until it is on.
 	useEffect(() => {
-		void useDebugEntriesStore.getState().checkDebugStatus().then(() => {
-			if (useDebugEntriesStore.getState().debugMode === "unknown") setOpen(true);
-		});
+		void useDebugEntriesStore
+			.getState()
+			.checkDebugStatus()
+			.then(() => {
+				if (useDebugEntriesStore.getState().debugMode === "unknown") setOpen(true);
+			});
 	}, []);
 
 	if (debugMode === "enabled") {

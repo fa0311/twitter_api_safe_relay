@@ -1,8 +1,8 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { raw as jqRaw } from "jq-wasm";
 import { match } from "ts-pattern";
+import type { ProfileClientGetter } from "twitter-api-safe-relay";
 import { randomChoice } from "twitter-api-safe-relay/tools";
-import type { TwitterApiProfileClient } from "twitter-api-safe-request";
 import { z } from "zod";
 import packageJson from "../package.json" with { type: "json" };
 import type { Capture } from "./utils/catalog.ts";
@@ -11,7 +11,7 @@ import { createResponseStore } from "./utils/store.ts";
 
 type AppOptions = {
 	name: string;
-	client: TwitterApiProfileClient;
+	getClient: ProfileClientGetter;
 };
 
 const responseStore = createResponseStore(16);
@@ -58,9 +58,9 @@ const createMcpServer = (options: AppOptions[], catalog: Capture[]) => {
 		{ instructions: INSTRUCTIONS },
 	);
 
-	const resolveClient = (profileName?: string) => {
+	const resolveClient = async (profileName?: string) => {
 		if (profileName === undefined) {
-			return randomChoice(options).client;
+			return await randomChoice(options).getClient();
 		}
 
 		const filteredOptions = options.filter((o) => o.name === profileName);
@@ -70,7 +70,7 @@ const createMcpServer = (options: AppOptions[], catalog: Capture[]) => {
 			throw new Error(`Unknown profile: "${profileName}". Available: ${profileNames.join(", ")}`);
 		}
 
-		return randomChoice(filteredOptions).client;
+		return await randomChoice(filteredOptions).getClient();
 	};
 
 	server.registerTool(
@@ -212,7 +212,8 @@ const createMcpServer = (options: AppOptions[], catalog: Capture[]) => {
 					data: request.data,
 				}));
 
-			const result = await resolveClient(request.profile).dispatch(data);
+			const client = await resolveClient(request.profile);
+			const result = await client.dispatch(data);
 			const id = responseStore.add(result);
 
 			return { content: [{ type: "text", text: id }] };

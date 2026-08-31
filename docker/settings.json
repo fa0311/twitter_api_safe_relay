@@ -1,16 +1,16 @@
 {
-  "port": 3000,
-  "logger": {
-    "level": "info"
-  },
-  "profiles": [
-    {
-      "name": "account1",
-      "browser": {
-        "type": "cdp",
-        "browserType": "chromium",
-        "cdpEndpoint": "http://127.0.0.1:9222"
-      }
-    }
-  ]
+	"port": 3000,
+	"logger": {
+		"level": "info"
+	},
+	"profiles": [
+		{
+			"name": "account1",
+			"browser": {
+				"type": "cdp",
+				"browserType": "chromium",
+				"cdpEndpoint": "http://127.0.0.1:9222"
+			}
+		}
+	]
 }

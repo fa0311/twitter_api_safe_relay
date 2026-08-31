@@ -1,4 +1,4 @@
-export const createCleanup = () => {
+export const createCleanup = ({ reuse }: { reuse: boolean }) => {
 	const handlers: (() => Promise<void>)[] = [];
 	let closed = false;
 
@@ -11,7 +11,7 @@ export const createCleanup = () => {
 	};
 
 	const close = async () => {
-		closed = true;
+		closed = !reuse;
 		const results = await Promise.allSettled(handlers.splice(0).map((fn) => fn()));
 		const errors = results.filter((result) => result.status === "rejected");
 		if (errors.length > 0) {

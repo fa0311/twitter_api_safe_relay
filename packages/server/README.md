@@ -23,7 +23,7 @@ Reads the settings file (JSON or JSONC; comments and trailing commas are allowed
 }
 ```
 
-Sign in to X/Twitter in the launched browser on first run. If the Playwright Chromium browser is not installed, either run `pnpx playwright install chromium` or set `"channel": "chrome"` in the browser settings to use the system Chrome.
+The browser starts on the first request; sign in to X/Twitter when it opens. If the Playwright Chromium browser is not installed, either run `pnpx playwright install chromium` or set `"channel": "chrome"` in the browser settings to use the system Chrome.
 
 Once the relay is running, replace the X.com origin with the relay origin and keep the path/query/body shape:
 

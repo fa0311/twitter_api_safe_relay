@@ -43,7 +43,8 @@ export const createDashboardApp = (clients: AppOptions[]) => {
 		const currentCount = count.increment();
 		if (currentCount === 1) {
 			await Promise.all(
-				clients.map(async ({ client }) => {
+				clients.map(async ({ getClient }) => {
+					const client = await getClient();
 					await client.inject();
 					await client.goto(client.page.url());
 					const hooks = createHookManager();
