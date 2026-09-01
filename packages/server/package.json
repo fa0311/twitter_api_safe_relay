@@ -60,7 +60,7 @@
 	"author": "",
 	"license": "MIT",
 	"dependencies": {
-		"@hono/node-server": "^1.19.4",
+		"@hono/node-server": "^2.0.10",
 		"@inquirer/prompts": "^8.5.2",
 		"boxen": "^8.0.1",
 		"chalk": "^5.6.2",

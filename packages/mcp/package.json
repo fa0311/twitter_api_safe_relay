@@ -50,7 +50,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"@hono/mcp": "^0.3.1",
-		"@hono/node-server": "^1.19.4",
+		"@hono/node-server": "^2.0.10",
 		"@modelcontextprotocol/sdk": "^1.25.0",
 		"hono": "^4.11.0",
 		"jq-wasm": "3.0.0-jq-1.8.2",
