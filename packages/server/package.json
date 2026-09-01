@@ -66,7 +66,7 @@
 		"chalk": "^5.6.2",
 		"commander": "^15.0.0",
 		"error-stack-parser": "^2.1.4",
-		"hono": "^4.11.0",
+		"hono": "^4.12.34",
 		"jsonc-parser": "^3.3.1",
 		"pino": "^10.1.0",
 		"pino-pretty": "^13.1.3",
