@@ -57,6 +57,7 @@ export const createIntegration = (): Integration => {
 			proxy: proxy(),
 		});
 		await context.addCookies(await cookies());
+		context.setDefaultNavigationTimeout(90_000); // the shared proxies are slow
 		cleanup(() => context.close());
 		return context;
 	};

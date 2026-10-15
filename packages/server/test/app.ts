@@ -23,6 +23,7 @@ describe("someFunction", () => {
 			channel: undefined,
 		});
 		await browser.addCookies(await integration.cookies());
+		browser.setDefaultNavigationTimeout(90_000);
 
 		const page = await browser.newPage();
 		const client = createTwitterBrowser(page);
