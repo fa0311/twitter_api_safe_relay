@@ -72,9 +72,10 @@ jobs:
           age-key: ${{ env.SOPS_AGE_KEY }}
 
       # GitHub-hosted runners get a Cloudflare challenge from x.com; the browser goes through a shared proxy
+      # (proxy_list is ordered fastest first, the slow exits made page loads exceed the navigation timeout)
       - name: Pick a proxy
         if: env.SOPS_AGE_KEY != ''
-        run: echo "X_PROXY_URL=$(shuf -n1 <<<"$PROXY_LIST")" >> "$GITHUB_ENV"
+        run: echo "X_PROXY_URL=$(head -n1 <<<"$PROXY_LIST")" >> "$GITHUB_ENV"
 
       - name: Run request tests
         if: env.SOPS_AGE_KEY != ''
