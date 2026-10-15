@@ -56,16 +56,24 @@
 					modules[moduleId] = function (module, _exports, require) {
 						const originalDefineExports = require.d;
 						require.d = (exp, definition) => {
-							for (const key in definition) {
+							const exports = {};
+							originalDefineExports(exports, definition);
+							for (const key of Object.keys(exports)) {
+								if (Object.hasOwn(exp, key)) {
+									continue;
+								}
 								Object.defineProperty(exp, key, {
-									enumerable: true,
+									...Object.getOwnPropertyDescriptor(exports, key),
 									configurable: true,
-									get: definition[key],
 								});
 							}
 						};
-						const result = originalFactory.apply(this, arguments);
-						require.d = originalDefineExports;
+						let result;
+						try {
+							result = originalFactory.apply(this, arguments);
+						} finally {
+							require.d = originalDefineExports;
+						}
 
 						const propertyDescriptors = Object.getOwnPropertyDescriptors(module.exports);
 						for (const [exportKey, _descriptor] of Object.entries(propertyDescriptors)) {
