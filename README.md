@@ -232,3 +232,11 @@ pnpm --filter twitter-api-safe-relay-dashboard test
 pnpm --filter twitter-api-safe-request test
 pnpm --filter twitter-api-safe-relay test
 ```
+
+The request and relay suites drive a real browser against x.com. A fresh profile is redirected to the login onboarding, so give them a logged-in session and, if your network is challenged by Cloudflare (GitHub-hosted runners are), an HTTP proxy:
+
+```sh
+X_COOKIE_FILE=cookie.json \          # browser extension cookie export (same format as fa0311/twitter-secrets)
+X_PROXY_URL=http://user:pass@host:1080 \
+pnpm --filter twitter-api-safe-request test
+```
