@@ -17,11 +17,13 @@ describe("someFunction", () => {
 			headless: true,
 			executablePath: undefined,
 			env: undefined,
-			proxy: undefined,
+			proxy: integration.proxy(),
 			args: [],
 			viewport: undefined,
 			channel: undefined,
 		});
+		await browser.addCookies(await integration.cookies());
+		browser.setDefaultNavigationTimeout(90_000);
 
 		const page = await browser.newPage();
 		const client = createTwitterBrowser(page);
