@@ -22,6 +22,7 @@ describe("someFunction", () => {
 			viewport: undefined,
 			channel: undefined,
 		});
+		await browser.addCookies(await integration.cookies());
 
 		const page = await browser.newPage();
 		const client = createTwitterBrowser(page);
