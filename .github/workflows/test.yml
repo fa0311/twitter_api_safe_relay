@@ -67,7 +67,7 @@ jobs:
       # the Playwright suites need a logged-in X session (fa0311/twitter-secrets); skipped on forks without the key
       - name: Decrypt X session
         if: env.SOPS_AGE_KEY != ''
-        uses: fa0311/twitter-secrets@55c4cdbeb9345dccc8905c22593cbe37df6c5585 # main
+        uses: fa0311/twitter-secrets@main
         with:
           age-key: ${{ env.SOPS_AGE_KEY }}
 
