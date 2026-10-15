@@ -10,9 +10,9 @@
 	},
 	"dependencies": {
 		"twitter-api-safe-wxt": "workspace:*",
-		"wxt": "0.20.27"
+		"wxt": "0.21.4"
 	},
 	"devDependencies": {
-		"typescript": "^5.9.3"
+		"typescript": "^7.0.2"
 	}
 }
