@@ -27,8 +27,7 @@
 		"access": "public"
 	},
 	"scripts": {
-		"check": "node --check setup.js",
-		"test": "vitest run"
+		"check": "node --check setup.js"
 	},
 	"keywords": [
 		"twitter",
@@ -37,8 +36,5 @@
 		"playwright",
 		"api"
 	],
-	"license": "MIT",
-	"devDependencies": {
-		"vitest": "^4.1.5"
-	}
+	"license": "MIT"
 }

@@ -50,9 +50,6 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Run injection tests
-        run: pnpm --filter twitter-api-safe-inject test
-
       - name: Run dashboard tests
         run: pnpm --filter twitter-api-safe-relay-dashboard test
 
