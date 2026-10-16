@@ -7,6 +7,7 @@
 		"url": "git+https://github.com/fa0311/twitter_api_safe_relay.git",
 		"directory": "packages/dump"
 	},
+	"private": true,
 	"type": "module",
 	"main": "dist/index.js",
 	"types": "./src/index.ts",
@@ -24,15 +25,6 @@
 		"dist",
 		"README.md"
 	],
-	"publishConfig": {
-		"types": "./dist/index.d.ts",
-		"exports": {
-			".": {
-				"types": "./dist/index.d.ts",
-				"import": "./dist/index.js"
-			}
-		}
-	},
 	"scripts": {
 		"clean": "rimraf dist",
 		"prebuild": "pnpm --filter twitter-api-safe-request build",
