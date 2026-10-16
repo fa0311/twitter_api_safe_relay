@@ -12,6 +12,8 @@ pnpx twitter-api-safe-mcp [settings-file]
 
 When run in a terminal without a settings file, it interactively prompts for the browser at startup. When launched by an MCP client, a settings file is required. The settings file format is the same as [twitter-api-safe-relay](../server/README.md).
 
+The operations it offers come from the request catalog bundled with `twitter-api-safe-relay` (`requests.ndjson`, also served at `GET /requests.ndjson`): the latest request the X web app sent for every operation, recorded with `twitter-api-safe-dump`. The agent picks an operation and changes only the variables.
+
 MCP client configuration:
 
 ```json

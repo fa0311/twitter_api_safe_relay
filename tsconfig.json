@@ -45,6 +45,7 @@
 		{ "path": "./packages/dashboard" },
 		{ "path": "./packages/server" },
 		{ "path": "./packages/mcp" },
+		{ "path": "./packages/dump" },
 		{ "path": "./packages/wxt" }
 	]
 }

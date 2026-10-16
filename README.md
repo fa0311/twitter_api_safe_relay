@@ -2,13 +2,14 @@
 
 `twitter-api-safe` is a TypeScript monorepo for sending Twitter/X Web App API requests through a logged-in browser.
 
-The workspace contains five main entry points:
+The workspace contains six main entry points:
 
 - [`twitter-api-safe-inject`](https://www.npmjs.com/package/twitter-api-safe-inject): the canonical MAIN-world `setup.js` asset shared by Playwright and browser extensions.
 - [`twitter-api-safe-request`](https://www.npmjs.com/package/twitter-api-safe-request): an npm package you can use directly from your own Playwright code.
 - [`twitter-api-safe-wxt`](https://www.npmjs.com/package/twitter-api-safe-wxt): a WXT adapter for browser extensions.
 - [`twitter-api-safe-relay`](https://www.npmjs.com/package/twitter-api-safe-relay): an HTTP relay server that wraps `twitter-api-safe-request`.
 - [`twitter-api-safe-mcp`](https://www.npmjs.com/package/twitter-api-safe-mcp): an MCP server that runs the relay and serves MCP in a single process.
+- [`twitter-api-safe-dump`](https://www.npmjs.com/package/twitter-api-safe-dump): records the request catalog (`requests.ndjson`) that the relay serves at `GET /requests.ndjson`.
 
 The core idea is simple: X.com already has an authenticated Web App API client running in the browser. This project injects a small bridge into that page and lets requests run through that live client instead of reimplementing cookies, CSRF handling, auth state, feature flags, and request behavior in Node.js.
 
@@ -156,6 +157,16 @@ npx skills add fa0311/twitter_api_safe_relay_skills
 ```
 
 Start the relay server, then point the skill at it with the `TWITTER_RELAY_BASE_URL` environment variable. The agent only sees the operation catalog — it never touches cookies, CSRF tokens, or other credentials directly.
+
+## Request catalog
+
+The relay serves `GET /requests.ndjson`: one request object per line, the latest request the X web app sent for every operation it uses. The MCP server and the skill pick an operation from it and only change the variables; `queryId`, `features` and `fieldToggles` stay as recorded. The file lives in `packages/server/requests.ndjson` and is recorded, not written by hand:
+
+```sh
+pnpm dump   # twitter-api-safe-dump --user-data-dir ./user_data --out packages/server/requests.ndjson
+```
+
+It browses a fixed list of x.com pages with the logged-in profile and keeps the latest request of every operation, with only the `content-type` header. Package README: [`packages/dump/README.md`](packages/dump/README.md)
 
 ## Configuration
 

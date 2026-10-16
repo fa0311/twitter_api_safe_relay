@@ -33,8 +33,19 @@ export const createIntegration = (): Integration => {
 		if (!file) {
 			return [];
 		}
-		const list = JSON.parse(await fs.promises.readFile(file, "utf8")) as { name: string; value: string; domain: string }[];
-		return list.map(({ name, value, domain }) => ({ name, value, domain, path: "/", secure: true, sameSite: "None" as const }));
+		const list = JSON.parse(await fs.promises.readFile(file, "utf8")) as {
+			name: string;
+			value: string;
+			domain: string;
+		}[];
+		return list.map(({ name, value, domain }) => ({
+			name,
+			value,
+			domain,
+			path: "/",
+			secure: true,
+			sameSite: "None" as const,
+		}));
 	};
 
 	// X_PROXY_URL: http://user:pass@host:port used by the browser (Chromium only authenticates against HTTP proxies)
