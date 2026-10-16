@@ -16,4 +16,4 @@ Options:
 - `--responses <dir>`: also write the response of every operation as `<dir>/<operationName>.json`.
 - `--page <path>`: extra pages to visit (repeatable).
 
-Only the `content-type` header is kept; cookies, CSRF tokens and transaction ids never leave the browser.
+Every recorded line carries `recordedAt` (when the request was seen); lines kept from a previous file keep their own, and lines without it are of unknown age. Only the `content-type` header is kept; cookies, CSRF tokens and transaction ids never leave the browser.

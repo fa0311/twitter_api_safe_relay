@@ -35,4 +35,4 @@ The relay also serves the debug dashboard UI (from [`twitter-api-safe-relay-dash
 
 ## Request catalog
 
-`GET /requests.ndjson` serves the catalog bundled with the package: one request object per line, the latest request the X web app sent for every operation it uses (GraphQL `queryId` / `features` / `fieldToggles` included). AI agents and [`twitter-api-safe-mcp`](https://www.npmjs.com/package/twitter-api-safe-mcp) pick an operation from it and only change the variables. It is recorded with [`twitter-api-safe-dump`](https://www.npmjs.com/package/twitter-api-safe-dump), not written by hand.
+`GET /requests.ndjson` serves the catalog bundled with the package: one request object per line, the latest request the X web app sent for every operation it uses (GraphQL `queryId` / `features` / `fieldToggles` included). AI agents and [`twitter-api-safe-mcp`](https://www.npmjs.com/package/twitter-api-safe-mcp) pick an operation from it and only change the variables. It is recorded with [`twitter-api-safe-dump`](https://www.npmjs.com/package/twitter-api-safe-dump), not written by hand; `recordedAt` on a line says when.

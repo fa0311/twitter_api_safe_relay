@@ -22,6 +22,7 @@ const GraphqlGetSchema = z
 		method: z.literal("GET"),
 		path: GraphqlPathSchema,
 		headers: z.record(z.string(), z.string()),
+		recordedAt: z.iso.datetime().optional(),
 		params: z.strictObject({
 			variables: z.string(),
 			features: z.string().optional(),
@@ -35,6 +36,7 @@ const GraphqlPostSchema = z
 		method: z.literal("POST"),
 		path: GraphqlPathSchema,
 		headers: z.record(z.string(), z.string()),
+		recordedAt: z.iso.datetime().optional(),
 		data: z.strictObject({
 			queryId: z.string(),
 			variables: z.record(z.string(), z.json()),
@@ -49,6 +51,7 @@ const RestGetSchema = z
 		method: z.literal("GET"),
 		path: z.string(),
 		headers: z.record(z.string(), z.string()).optional(),
+		recordedAt: z.iso.datetime().optional(),
 		params: z.record(z.string(), z.json()).optional(),
 	})
 	.transform((capture) => ({ type: "rest" as const, ...capture }));
@@ -58,6 +61,7 @@ const RestPostSchema = z
 		method: z.literal("POST"),
 		path: z.string(),
 		headers: z.record(z.string(), z.string()).optional(),
+		recordedAt: z.iso.datetime().optional(),
 		params: z.record(z.string(), z.json()).optional(),
 		data: z.record(z.string(), z.json()),
 	})
