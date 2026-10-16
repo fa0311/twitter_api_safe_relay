@@ -52,6 +52,7 @@ const RequestSchema = z.looseObject({
 	headers: z.record(z.string(), z.unknown()).optional(),
 	params: z.unknown().optional(),
 	data: z.unknown().optional(),
+	recordedAt: z.iso.datetime().optional(), // when the line was recorded; lines without it are of unknown age
 });
 
 export type CatalogEntry = {
@@ -76,9 +77,17 @@ export const collect = (entries: TwitterApiHookEntry[]): CatalogEntry[] => {
 		if (!parsed.success) {
 			continue;
 		}
-		const { headers, ...rest } = parsed.data;
+		const { headers, recordedAt, ...rest } = parsed.data;
 		const contentType = headers?.["content-type"];
-		const request = { ...rest, headers: contentType === undefined ? {} : { "content-type": contentType } };
+		const request = {
+			...rest,
+			headers: contentType === undefined ? {} : { "content-type": contentType },
+			...(entry.requestAt > 0
+				? { recordedAt: new Date(entry.requestAt).toISOString() }
+				: recordedAt
+					? { recordedAt }
+					: {}),
+		};
 		const path = new URL(request.path, "https://x.com").pathname;
 		if (!/^\/(graphql|1\.1|2)\//.test(path)) {
 			continue; // only what the relay proxies (telemetry such as /12/measurement is not an API)
@@ -108,3 +117,4 @@ export const fromNdjson = (text: string): TwitterApiHookEntry[] =>
 		.split("\n")
 		.filter((line) => line.trim() !== "")
 		.map((line) => ({ request: JSON.parse(line) as unknown, response: undefined, requestAt: 0, receivedAt: 0 }));
+// requestAt stays 0 for previous lines: a recorded request always wins, and their own recordedAt is carried over.

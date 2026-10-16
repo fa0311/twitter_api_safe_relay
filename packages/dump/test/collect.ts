@@ -43,6 +43,7 @@ describe("collect", () => {
 			path: "/graphql/abc/UserByScreenName",
 			params: { variables: '{"screen_name":"elonmusk"}' },
 			headers: {},
+			recordedAt: new Date(2).toISOString(),
 		});
 		expect(catalog[1]?.response).toEqual({ ok: 2 });
 		expect(toNdjson(catalog).split("\n")).toHaveLength(3);
@@ -57,5 +58,7 @@ describe("collect", () => {
 			entry({ method: "GET", path: "/graphql/new/UserByScreenName", headers: {} }, 1),
 		]);
 		expect(catalog.map((e) => e.path)).toEqual(["/graphql/keep/Viewer", "/graphql/new/UserByScreenName"]);
+		expect(catalog[0]?.request).not.toHaveProperty("recordedAt");
+		expect(catalog[1]?.request).toHaveProperty("recordedAt", new Date(1).toISOString());
 	});
 });
