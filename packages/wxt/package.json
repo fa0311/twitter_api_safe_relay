@@ -60,9 +60,9 @@
 		"twitter-api-safe-inject": "workspace:*"
 	},
 	"devDependencies": {
-		"@types/node": "^26.0.0",
+		"@types/node": "^26.6.5",
 		"rimraf": "^6.1.3",
-		"typescript": "^5.9.3",
-		"wxt": "0.20.27"
+		"typescript": "^7.0.2",
+		"wxt": "^0.21.4"
 	}
 }

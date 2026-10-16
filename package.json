@@ -23,10 +23,10 @@
 	"author": "",
 	"license": "MIT",
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.16",
-		"@types/node": "^25.0.2",
-		"concurrently": "^10.0.3",
-		"typescript": "^5.9.3"
+		"@biomejs/biome": "^2.5.15",
+		"@types/node": "^26.6.5",
+		"concurrently": "^10.0.6",
+		"typescript": "^7.0.2"
 	},
 	"packageManager": "pnpm@11.5.0"
 }
