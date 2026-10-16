@@ -57,33 +57,14 @@ jobs:
 
       - name: Check published version
         id: version
-        env:
-          PACKAGE_NAME: ${{ matrix.package }}
-          PACKAGE_PATH: ${{ matrix.path }}
-        shell: bash
+        working-directory: ${{ matrix.path }}
         run: |
-          package_version="$(node -p "require('./${PACKAGE_PATH}/package.json').version")"
-          package_spec="${PACKAGE_NAME}@${package_version}"
-
-          set +e
-          view_output="$(npm view "$package_spec" version --json 2>&1)"
-          view_status=$?
-          set -e
-
-          if [[ $view_status -eq 0 ]]; then
-            echo "should_publish=false" >> "$GITHUB_OUTPUT"
-            echo "Skipping ${package_spec}: already published."
-            exit 0
-          fi
-
-          if grep -qE "E404|404 Not Found" <<<"$view_output"; then
+          spec="$(jq -r '"\(.name)@\(.version)"' package.json)"
+          if npm view "$spec" version > /dev/null 2>&1; then
+            echo "$spec is already on npm"
+          else
             echo "should_publish=true" >> "$GITHUB_OUTPUT"
-            echo "${package_spec} has not been published yet."
-            exit 0
           fi
-
-          echo "$view_output" >&2
-          exit "$view_status"
 
       - name: Install dependencies
         if: steps.version.outputs.should_publish == 'true'
