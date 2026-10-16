@@ -1,7 +1,5 @@
+import { readCatalog } from "twitter-api-safe-relay";
 import { z } from "zod";
-
-const CATALOG_URL =
-	"https://raw.githubusercontent.com/fa0311/twitter_api_safe_relay_skills/main/skills/twitter-api-relay/requests.ndjson";
 
 const GraphqlPath = new URLPattern({ pathname: "/graphql/:queryId/:operationName" });
 
@@ -69,14 +67,17 @@ const CaptureSchema = z.union([GraphqlGetSchema, GraphqlPostSchema, RestGetSchem
 
 export type Capture = z.output<typeof CaptureSchema>;
 
-export const fetchCapture = async (url: string = CATALOG_URL) => {
-	const response = await fetch(url);
-	if (!response.ok) {
-		throw new Error(`Failed to fetch request catalog from ${url}: ${response.status} ${response.statusText}`);
-	}
-	const text = await response.text();
-	return text
-		.split("\n")
-		.filter((line) => line.trim() !== "")
-		.map((line) => CaptureSchema.parse(JSON.parse(line)));
+// The catalog bundled with twitter-api-safe-relay (requests.ndjson), or one served by a URL.
+export const fetchCapture = async (url?: string) => {
+	const lines = await (async () => {
+		if (url === undefined) {
+			return readCatalog();
+		}
+		const response = await fetch(url);
+		if (!response.ok) {
+			throw new Error(`Failed to fetch request catalog from ${url}: ${response.status} ${response.statusText}`);
+		}
+		return (await response.text()).split("\n").filter((line) => line.trim() !== "");
+	})();
+	return lines.map((line) => CaptureSchema.parse(JSON.parse(line)));
 };

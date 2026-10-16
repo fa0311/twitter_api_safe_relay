@@ -27,6 +27,7 @@
 	},
 	"files": [
 		"dist",
+		"requests.ndjson",
 		"README.md"
 	],
 	"publishConfig": {

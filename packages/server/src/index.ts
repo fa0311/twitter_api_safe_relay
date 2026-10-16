@@ -1,4 +1,5 @@
 export { createApp } from "./app.ts";
+export { catalogPath, readCatalog } from "./catalog.ts";
 export { createDashboardApp } from "./dashboard/app.ts";
 export type { AppOptions } from "./utils/app.ts";
 export { connectProfileBrowser } from "./utils/browser.ts";

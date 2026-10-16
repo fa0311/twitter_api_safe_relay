@@ -1,6 +1,8 @@
+import fs from "node:fs/promises";
 import type { Context } from "hono";
 import { Hono } from "hono";
 import type { TwitterApiProfileClient } from "twitter-api-safe-request";
+import { catalogPath } from "./catalog.ts";
 import type { AppOptions } from "./utils/app.ts";
 import { randomChoice } from "./utils/random.ts";
 
@@ -13,6 +15,10 @@ export const createApp = async (options: AppOptions[]) => {
 
 	app.get("/profiles", (c) => {
 		return c.json({ profiles: options.map((o) => o.name) });
+	});
+
+	app.get("/requests.ndjson", async (c) => {
+		return c.body(await fs.readFile(catalogPath, "utf-8"), 200, { "content-type": "application/x-ndjson" });
 	});
 
 	// Middleware: resolve client for all API routes

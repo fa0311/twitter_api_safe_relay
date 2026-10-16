@@ -13,7 +13,8 @@
 		"test": "pnpm -r run test",
 		"check": "pnpm -r run check",
 		"lint": "biome lint .",
-		"format": "biome format --write ."
+		"format": "biome format --write .",
+		"dump": "node --conditions=development packages/dump/src/dump.ts --user-data-dir ./user_data --out packages/server/requests.ndjson"
 	},
 	"keywords": [
 		"typescript",
