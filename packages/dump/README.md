@@ -1,9 +1,9 @@
 # twitter-api-safe-dump
 
-Records the requests the X web app sends while a logged-in profile browses a fixed set of pages, through the same bridge as `twitter-api-safe-request`, and writes them as the `requests.ndjson` catalog that `twitter-api-safe-relay` serves at `GET /requests.ndjson` (one request object per line, the latest request of every operation).
+Not published to npm: it is run from this repository when the catalog is refreshed. Records the requests the X web app sends while a logged-in profile browses a fixed set of pages, through the same bridge as `twitter-api-safe-request`, and writes them as the `requests.ndjson` catalog that `twitter-api-safe-relay` serves at `GET /requests.ndjson` (one request object per line, the latest request of every operation).
 
 ```sh
-pnpx twitter-api-safe-dump --user-data-dir ./user_data --out packages/server/requests.ndjson
+pnpm dump   # from the repository root: --user-data-dir ./user_data --out packages/server/requests.ndjson
 ```
 
 Options:

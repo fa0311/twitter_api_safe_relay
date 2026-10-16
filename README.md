@@ -9,7 +9,7 @@ The workspace contains six main entry points:
 - [`twitter-api-safe-wxt`](https://www.npmjs.com/package/twitter-api-safe-wxt): a WXT adapter for browser extensions.
 - [`twitter-api-safe-relay`](https://www.npmjs.com/package/twitter-api-safe-relay): an HTTP relay server that wraps `twitter-api-safe-request`.
 - [`twitter-api-safe-mcp`](https://www.npmjs.com/package/twitter-api-safe-mcp): an MCP server that runs the relay and serves MCP in a single process.
-- [`twitter-api-safe-dump`](https://www.npmjs.com/package/twitter-api-safe-dump): records the request catalog (`requests.ndjson`) that the relay serves at `GET /requests.ndjson`.
+- `twitter-api-safe-dump` (this repository only): records the request catalog (`requests.ndjson`) that the relay serves at `GET /requests.ndjson`.
 
 The core idea is simple: X.com already has an authenticated Web App API client running in the browser. This project injects a small bridge into that page and lets requests run through that live client instead of reimplementing cookies, CSRF handling, auth state, feature flags, and request behavior in Node.js.
 
