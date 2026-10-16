@@ -75,7 +75,7 @@ jobs:
       # (proxy_list is ordered fastest first, the slow exits made page loads exceed the navigation timeout)
       - name: Pick a proxy
         if: env.SOPS_AGE_KEY != ''
-        run: echo "X_PROXY_URL=$(head -n1 <<<"$PROXY_LIST")" >> "$GITHUB_ENV"
+        run: echo "X_PROXY_URL=$(sed -n "$((${{ strategy.job-index }} + 1))p" <<<"$PROXY_LIST")" >> "$GITHUB_ENV"  # one exit per matrix job
 
       - name: Run request tests
         if: env.SOPS_AGE_KEY != ''
