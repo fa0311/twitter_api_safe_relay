@@ -103,4 +103,16 @@ describe("someFunction", () => {
 
 		expect(text).toContain("Hey you …");
 	}, 120_000);
+
+	it("v1.1 GET, with and without the /i/api prefix", async () => {
+		const app = await createMockApp();
+		const params = new URLSearchParams({ q: "elonmusk", result_type: "users" });
+
+		for (const prefix of ["", "/i/api"]) {
+			const res = await app.request(`${prefix}/1.1/search/typeahead.json?${params.toString()}`, { method: "GET" });
+			const result = (await res.json()) as any;
+			expect(result.users.length).toBeGreaterThan(0);
+			expect(typeof result.users[0].screen_name).toBe("string");
+		}
+	}, 120_000);
 });

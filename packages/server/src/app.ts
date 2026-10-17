@@ -68,51 +68,25 @@ export const createApp = async (options: AppOptions[]) => {
 		});
 	});
 
-	app.get("/1.1/*", (c) => {
+	// v1.1 / v2 REST: the X web app calls them under /i/api too, so both prefixes are accepted
+	const rest = (method: "GET" | "POST") => (c: Context) => {
 		return withClient(c, async (client) => {
 			const result = await client.dispatch({
-				method: "GET",
+				method,
+				...(method === "POST" ? { data: await c.req.json() } : {}),
 				params: c.req.query(),
-				path: c.req.path,
+				path: c.req.path.replace(/^\/i\/api/, ""),
 			});
 			return c.json(result);
 		});
-	});
+	};
 
-	app.post("/1.1/*", (c) => {
-		return withClient(c, async (client) => {
-			const result = await client.dispatch({
-				method: "POST",
-				data: await c.req.json(),
-				params: c.req.query(),
-				path: c.req.path,
-			});
-			return c.json(result);
-		});
-	});
-
-	app.get("/2/*", (c) => {
-		return withClient(c, async (client) => {
-			const result = await client.dispatch({
-				method: "GET",
-				params: c.req.query(),
-				path: c.req.path,
-			});
-			return c.json(result);
-		});
-	});
-
-	app.post("/2/*", (c) => {
-		return withClient(c, async (client) => {
-			const result = await client.dispatch({
-				method: "POST",
-				data: await c.req.json(),
-				params: c.req.query(),
-				path: c.req.path,
-			});
-			return c.json(result);
-		});
-	});
+	for (const prefix of ["", "/i/api"]) {
+		app.get(`${prefix}/1.1/*`, rest("GET"));
+		app.post(`${prefix}/1.1/*`, rest("POST"));
+		app.get(`${prefix}/2/*`, rest("GET"));
+		app.post(`${prefix}/2/*`, rest("POST"));
+	}
 
 	return app;
 };
