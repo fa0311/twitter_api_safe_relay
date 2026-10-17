@@ -68,7 +68,7 @@ export const createApp = async (options: AppOptions[]) => {
 		});
 	});
 
-	// v1.1 / v2 REST: the X web app calls them under /i/api too, so both prefixes are accepted
+	// v1.1 / v2 REST live under /i/api like GraphQL, as in the X web app
 	const rest = (method: "GET" | "POST") => (c: Context) => {
 		return withClient(c, async (client) => {
 			const result = await client.dispatch({
@@ -81,12 +81,10 @@ export const createApp = async (options: AppOptions[]) => {
 		});
 	};
 
-	for (const prefix of ["", "/i/api"]) {
-		app.get(`${prefix}/1.1/*`, rest("GET"));
-		app.post(`${prefix}/1.1/*`, rest("POST"));
-		app.get(`${prefix}/2/*`, rest("GET"));
-		app.post(`${prefix}/2/*`, rest("POST"));
-	}
+	app.get("/i/api/1.1/*", rest("GET"));
+	app.post("/i/api/1.1/*", rest("POST"));
+	app.get("/i/api/2/*", rest("GET"));
+	app.post("/i/api/2/*", rest("POST"));
 
 	return app;
 };

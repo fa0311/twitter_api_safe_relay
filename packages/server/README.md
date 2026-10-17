@@ -25,7 +25,7 @@ Reads the settings file (JSON or JSONC; comments and trailing commas are allowed
 
 The browser starts on the first request; sign in to X/Twitter when it opens. If the Playwright Chromium browser is not installed, either run `pnpx playwright install chromium` or set `"channel": "chrome"` in the browser settings to use the system Chrome.
 
-Once the relay is running, replace the X.com origin with the relay origin and keep the path/query/body shape. GraphQL and the v1.1 / v2 REST endpoints all live under `/i/api`, as in the X web app (`/1.1/*` and `/2/*` without the prefix are still accepted). With several profiles, pick one with the `x-profile-name` header.
+Once the relay is running, replace the X.com origin with the relay origin and keep the path/query/body shape. GraphQL and the v1.1 / v2 REST endpoints all live under `/i/api`, as in the X web app. With several profiles, pick one with the `x-profile-name` header.
 
 ```sh
 curl 'http://localhost:3000/i/api/graphql/gKia-nBM9kwuDEfSDeWMfQ/HomeTimeline'
