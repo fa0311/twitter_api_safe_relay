@@ -117,19 +117,48 @@ Runnable example: [`examples/basic`](examples/basic)
 
 Use `twitter-api-safe-relay` when another process should call the X Web App API over HTTP.
 
-Once the relay is running, replace the X.com origin with the relay origin and keep the path/query/body shape:
+Once the relay is running, replace the X.com origin with the relay origin and keep the path/query/body shape. This holds for GraphQL and for the v1.1 / v2 REST endpoints alike: the X web app calls all of them under `/i/api`.
 
-You do not need to provide Cookie, CSRF, or x-client-transaction-id yourself; the relay adds those headers automatically.
+You do not need to provide Cookie, CSRF, or x-client-transaction-id yourself; the relay adds those headers automatically. With several profiles, pick one with the `x-profile-name` header (a random profile answers otherwise).
 
 ```txt
 https://x.com/i/api/graphql/{queryId}/{operationName}?...
 http://localhost:3000/i/api/graphql/{queryId}/{operationName}?...
+
+https://x.com/i/api/1.1/search/typeahead.json?q=...
+http://localhost:3000/i/api/1.1/search/typeahead.json?q=...
 ```
 
 For example:
 
 ```sh
 curl 'http://localhost:3000/i/api/graphql/gKia-nBM9kwuDEfSDeWMfQ/HomeTimeline'
+curl 'http://localhost:3000/i/api/1.1/search/typeahead.json?q=elonmusk&result_type=users'
+```
+
+### From twitter-openapi-typescript / twitter_openapi_python
+
+The typed clients generated from [twitter-openapi](https://github.com/fa0311/twitter-openapi), [twitter-openapi-typescript](https://github.com/fa0311/twitter-openapi-typescript) and [twitter_openapi_python](https://github.com/fa0311/twitter_openapi_python), only need their base URL pointed at the relay. Give them a bare configuration: the relay supplies the session, so no cookies or headers are needed on the client side.
+
+```typescript
+import { TwitterOpenApi } from 'twitter-openapi-typescript';
+import { Configuration } from 'twitter-openapi-typescript-generated';
+
+const api = new TwitterOpenApi();
+const client = await api.getClient(
+  new Configuration({ basePath: 'http://localhost:3000/i/api', headers: { 'x-profile-name': 'account1' } }),
+);
+const response = await client.getUserApi().getUserByScreenName({ screenName: 'elonmusk' });
+```
+
+```python
+import twitter_openapi_python_generated as twitter
+from twitter_openapi_python import TwitterOpenapiPython
+
+api_client = twitter.ApiClient(twitter.Configuration(host="http://localhost:3000/i/api"))
+api_client.set_default_header("x-profile-name", "account1")
+client = TwitterOpenapiPython().get_twitter_openapi_python_client(api_client)
+response = client.get_user_api().get_user_by_screen_name(screen_name="elonmusk")
 ```
 
 Server README: [`packages/server/README.md`](packages/server/README.md)

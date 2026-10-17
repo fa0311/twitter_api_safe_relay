@@ -103,4 +103,17 @@ describe("someFunction", () => {
 
 		expect(text).toContain("Hey you …");
 	}, 120_000);
+
+	it("v1.1 GET under /i/api, like the X web app", async () => {
+		const app = await createMockApp();
+		const params = new URLSearchParams({ q: "elonmusk", result_type: "users" });
+
+		const res = await app.request(`/i/api/1.1/search/typeahead.json?${params.toString()}`, { method: "GET" });
+		const result = (await res.json()) as any;
+		expect(result.users.length).toBeGreaterThan(0);
+		expect(typeof result.users[0].screen_name).toBe("string");
+
+		const bare = await app.request(`/1.1/search/typeahead.json?${params.toString()}`, { method: "GET" });
+		expect(bare.status).toBe(404);
+	}, 120_000);
 });
