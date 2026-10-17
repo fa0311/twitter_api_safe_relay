@@ -140,7 +140,7 @@ curl 'http://localhost:3000/i/api/1.1/search/typeahead.json?q=elonmusk&result_ty
 
 ### From twitter-openapi-typescript / twitter_openapi_python
 
-The typed clients generated from [twitter-openapi](https://github.com/fa0311/twitter-openapi) only need their base URL pointed at the relay. Give them a bare configuration: the relay supplies the session, so no cookies or headers are needed on the client side.
+The typed clients generated from [twitter-openapi](https://github.com/fa0311/twitter-openapi), [twitter-openapi-typescript](https://github.com/fa0311/twitter-openapi-typescript) and [twitter_openapi_python](https://github.com/fa0311/twitter_openapi_python), only need their base URL pointed at the relay. Give them a bare configuration: the relay supplies the session, so no cookies or headers are needed on the client side.
 
 ```typescript
 import { TwitterOpenApi } from 'twitter-openapi-typescript';
