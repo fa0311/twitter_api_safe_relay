@@ -5,4 +5,12 @@ export { CommandExecutionRequiredError, catchError, ZodParseError } from "./util
 export { createFatalLogger } from "./utils/fatal.ts";
 export { createLogger } from "./utils/logger.ts";
 export { randomChoice } from "./utils/random.ts";
+export {
+	createRateLimitStore,
+	dispatchWithHeaders,
+	endpointOf,
+	type RateLimit,
+	rateLimitHeadersOf,
+	rateLimitOf,
+} from "./utils/ratelimit.ts";
 export { createShutdown } from "./utils/shutdown.ts";
