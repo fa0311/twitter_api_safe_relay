@@ -138,26 +138,20 @@ curl 'http://localhost:3000/i/api/1.1/search/typeahead.json?q=elonmusk&result_ty
 
 ### From twitter-openapi-typescript / twitter_openapi_python
 
-The typed clients generated from [twitter-openapi](https://github.com/fa0311/twitter-openapi), [twitter-openapi-typescript](https://github.com/fa0311/twitter-openapi-typescript) and [twitter_openapi_python](https://github.com/fa0311/twitter_openapi_python), only need their base URL pointed at the relay. Give them a bare configuration: the relay supplies the session, so no cookies or headers are needed on the client side.
+The typed clients generated from [twitter-openapi](https://github.com/fa0311/twitter-openapi), [twitter-openapi-typescript](https://github.com/fa0311/twitter-openapi-typescript) and [twitter_openapi_python](https://github.com/fa0311/twitter_openapi_python), have a factory for a host that already holds the session (0.1.5 and later): it sends no cookies, no browser headers and no transaction id, only the query and the headers you pass. Point it at the relay and pass `x-profile-name` to pick a profile.
 
 ```typescript
 import { TwitterOpenApi } from 'twitter-openapi-typescript';
-import { Configuration } from 'twitter-openapi-typescript-generated';
 
 const api = new TwitterOpenApi();
-const client = await api.getClient(
-  new Configuration({ basePath: 'http://localhost:3000/i/api', headers: { 'x-profile-name': 'account1' } }),
-);
+const client = await api.getClientFromEndpoint('http://localhost:3000/i/api', { 'x-profile-name': 'account1' });
 const response = await client.getUserApi().getUserByScreenName({ screenName: 'elonmusk' });
 ```
 
 ```python
-import twitter_openapi_python_generated as twitter
 from twitter_openapi_python import TwitterOpenapiPython
 
-api_client = twitter.ApiClient(twitter.Configuration(host="http://localhost:3000/i/api"))
-api_client.set_default_header("x-profile-name", "account1")
-client = TwitterOpenapiPython().get_twitter_openapi_python_client(api_client)
+client = TwitterOpenapiPython().get_client_from_endpoint("http://localhost:3000/i/api", {"x-profile-name": "account1"})
 response = client.get_user_api().get_user_by_screen_name(screen_name="elonmusk")
 ```
 
