@@ -16,6 +16,10 @@ export default defineConfig({
 				changeOrigin: true,
 				target: apiTarget,
 			},
+			"/health": {
+				changeOrigin: true,
+				target: apiTarget,
+			},
 			"/i/api/graphql": {
 				changeOrigin: true,
 				target: apiTarget,

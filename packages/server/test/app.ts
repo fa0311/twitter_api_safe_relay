@@ -102,6 +102,10 @@ describe("someFunction", () => {
 		const text = (result as any).data.tweetResult.result.legacy.full_text;
 
 		expect(text).toContain("Hey you …");
+		expect(res.headers.get("x-rate-limit-remaining")).toMatch(/^\d+$/);
+
+		const health = (await (await app.request("/health")).json()) as any;
+		expect(health.rateLimit.mock.TweetResultByRestId.limit).toBeGreaterThan(0);
 	}, 120_000);
 
 	it("v1.1 GET under /i/api, like the X web app", async () => {
