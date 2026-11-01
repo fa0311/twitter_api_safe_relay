@@ -20,15 +20,7 @@ export default defineConfig({
 				changeOrigin: true,
 				target: apiTarget,
 			},
-			"/i/api/graphql": {
-				changeOrigin: true,
-				target: apiTarget,
-			},
-			"/1.1": {
-				changeOrigin: true,
-				target: apiTarget,
-			},
-			"/2": {
+			"/i/api": {
 				changeOrigin: true,
 				target: apiTarget,
 			},

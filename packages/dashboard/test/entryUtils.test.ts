@@ -113,7 +113,19 @@ describe("defaultScriptOf", () => {
 		expect(script).toContain("new URLSearchParams");
 		expect(script).toContain('"user.fields": "id,name"');
 		// biome-ignore lint/suspicious/noTemplateCurlyInString: asserts the generated script contains the literal text
-		expect(script).toContain("return await fetch(`/2/users/me?${params}`");
+		expect(script).toContain("return await fetch(`/i/api/2/users/me?${params}`");
+	});
+
+	it("creates relay script for REST POST entries", () => {
+		const entry = buildEntry(
+			rawEvent({ data: { user_id: "44196397" }, method: "POST", path: "/1.1/friendships/create.json" }),
+			1,
+		);
+
+		const script = defaultScriptOf(entry);
+
+		expect(script).toContain('return await fetch("/i/api/1.1/friendships/create.json"');
+		expect(script).toContain('"user_id": "44196397"');
 	});
 
 	it("creates relay script for GraphQL POST entries", () => {
