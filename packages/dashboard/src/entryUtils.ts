@@ -180,8 +180,11 @@ export const statsOf = (entries: DebugEntry[]): EntryStats =>
 		{ total: 0, v11: 0, v2: 0, graphql: 0 },
 	);
 
+// The relay serves GraphQL and REST under /i/api, as the X web app does
+const relayPath = (path: string) => `/i/api${path}`;
+
 const graphqlRelayPath = (queryId: string, operationName: string) =>
-	`/i/api/graphql/${encodeURIComponent(queryId)}/${encodeURIComponent(operationName)}`;
+	relayPath(`/graphql/${encodeURIComponent(queryId)}/${encodeURIComponent(operationName)}`);
 
 export const defaultScriptOf = (entry: DebugEntry): string => {
 	if (entry.version === "graphql") {
@@ -220,7 +223,7 @@ export const defaultScriptOf = (entry: DebugEntry): string => {
 		return [
 			`const params = new URLSearchParams(${JSON.stringify(cfg.params, null, "\t")});`,
 			"",
-			`return await fetch(\`${cfg.path}?\${params}\`, {`,
+			`return await fetch(\`${relayPath(cfg.path)}?\${params}\`, {`,
 			'\tmethod: "GET",',
 			"});",
 		].join("\n");
@@ -229,7 +232,7 @@ export const defaultScriptOf = (entry: DebugEntry): string => {
 	return [
 		`const data = ${JSON.stringify(cfg.data, null, "\t")};`,
 		"",
-		`return await fetch(${JSON.stringify(cfg.path)}, {`,
+		`return await fetch(${JSON.stringify(relayPath(cfg.path))}, {`,
 		'\tmethod: "POST",',
 		"\tbody: JSON.stringify(data),",
 		"});",
