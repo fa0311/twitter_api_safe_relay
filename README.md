@@ -138,7 +138,7 @@ curl 'http://localhost:3000/i/api/1.1/search/typeahead.json?q=elonmusk&result_ty
 
 ### From twitter-openapi-typescript / twitter_openapi_python
 
-The typed clients generated from [twitter-openapi](https://github.com/fa0311/twitter-openapi), [twitter-openapi-typescript](https://github.com/fa0311/twitter-openapi-typescript) and [twitter_openapi_python](https://github.com/fa0311/twitter_openapi_python), have a factory for a host that already holds the session (0.1.5 and later): it sends no cookies, no browser headers and no transaction id, only the query and the headers you pass. Point it at the relay and pass `x-profile-name` to pick a profile.
+The typed clients generated from [twitter-openapi](https://github.com/fa0311/twitter-openapi), [twitter-openapi-typescript](https://github.com/fa0311/twitter-openapi-typescript) and [twitter_openapi_python](https://github.com/fa0311/twitter_openapi_python), only need their endpoint factory pointed at the relay: the relay supplies the session, so the client sends nothing but the query and the headers you pass (`x-profile-name` picks a profile).
 
 ```typescript
 import { TwitterOpenApi } from 'twitter-openapi-typescript';
