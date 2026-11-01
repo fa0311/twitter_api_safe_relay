@@ -34,21 +34,15 @@ curl 'http://localhost:3000/i/api/1.1/search/typeahead.json?q=elonmusk&result_ty
 
 Typed clients work the same way: point `twitter-openapi-typescript` or `twitter_openapi_python` at `http://localhost:3000/i/api` with a bare configuration (see the [repository README](https://github.com/fa0311/twitter_api_safe_relay#from-twitter-openapi-typescript--twitter_openapi_python)).
 
+The relay also serves the debug dashboard UI (from [`twitter-api-safe-relay-dashboard`](https://www.npmjs.com/package/twitter-api-safe-relay-dashboard)) and its API on the same port. Set `"dashboard": false` in the settings file to disable it.
+
 ## Rate limits
 
-X answers GraphQL and most REST calls with `x-rate-limit-limit`, `x-rate-limit-remaining` and `x-rate-limit-reset` (unix seconds; `search/typeahead.json` is one without). The relay passes the three headers through on its own response, so a client that reads them from `https://x.com` reads the same values from the relay. The latest values per profile and endpoint (GraphQL operation name, REST path) are kept in memory and served by `GET /health`; the dashboard shows the same table.
+X's `x-rate-limit-limit` / `x-rate-limit-remaining` / `x-rate-limit-reset` headers come back unchanged. `GET /health` lists the latest values per profile and endpoint; the dashboard shows the same table.
 
 ```sh
-curl -i 'http://localhost:3000/i/api/graphql/AMIBMjtxEEATh4z8V9GtRg/UserByScreenName?variables=...'
-# x-rate-limit-limit: 95
-# x-rate-limit-remaining: 94
-# x-rate-limit-reset: 1761900000
-
 curl 'http://localhost:3000/health'
-# {"status":"ok","profiles":["account1"],"rateLimit":{"account1":{"UserByScreenName":{"limit":95,"remaining":94,"reset":1761900000}}}}
 ```
-
-The relay also serves the debug dashboard UI (from [`twitter-api-safe-relay-dashboard`](https://www.npmjs.com/package/twitter-api-safe-relay-dashboard)) and its API on the same port. Set `"dashboard": false` in the settings file to disable it.
 
 ## Request catalog
 
