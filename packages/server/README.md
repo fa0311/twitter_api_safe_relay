@@ -36,14 +36,6 @@ Typed clients work the same way: point `twitter-openapi-typescript` or `twitter_
 
 The relay also serves the debug dashboard UI (from [`twitter-api-safe-relay-dashboard`](https://www.npmjs.com/package/twitter-api-safe-relay-dashboard)) and its API on the same port. Set `"dashboard": false` in the settings file to disable it.
 
-## Rate limits
-
-X's `x-rate-limit-limit` / `x-rate-limit-remaining` / `x-rate-limit-reset` headers come back unchanged. `GET /health` lists the latest values per profile and endpoint; the dashboard shows the same table.
-
-```sh
-curl 'http://localhost:3000/health'
-```
-
 ## Request catalog
 
 `GET /requests.ndjson` serves the catalog bundled with the package: one request object per line, the latest request the X web app sent for every operation it uses (GraphQL `queryId` / `features` / `fieldToggles` included). AI agents and [`twitter-api-safe-mcp`](https://www.npmjs.com/package/twitter-api-safe-mcp) pick an operation from it and only change the variables. It is recorded with `twitter-api-safe-dump` (`packages/dump` of this repository, not published), not written by hand; `recordedAt` on a line says when.
