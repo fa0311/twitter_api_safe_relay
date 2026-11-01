@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { rateLimitRowsOf } from "../src/rateLimits.ts";
+import { filterRateLimitRows, rateLimitRowsOf } from "../src/rateLimits.ts";
 
 describe("rateLimitRowsOf", () => {
 	it("flattens /health into rows sorted by profile and endpoint", () => {
@@ -25,5 +25,19 @@ describe("rateLimitRowsOf", () => {
 
 	it("rejects a payload without rate limits", () => {
 		expect(() => rateLimitRowsOf({ status: "ok" })).toThrow();
+	});
+
+	it("filters rows by profile or endpoint text", () => {
+		const rows = rateLimitRowsOf({
+			rateLimit: {
+				a: {
+					HomeTimeline: { limit: 500, remaining: 499, reset: 1 },
+					UserByScreenName: { limit: 95, remaining: 94, reset: 1 },
+				},
+			},
+		});
+		expect(filterRateLimitRows(rows, "home").map((row) => row.endpoint)).toEqual(["HomeTimeline"]);
+		expect(filterRateLimitRows(rows, " A ")).toHaveLength(2);
+		expect(filterRateLimitRows(rows, "")).toBe(rows);
 	});
 });

@@ -18,3 +18,8 @@ export const rateLimitRowsOf = (health: unknown): RateLimitRow[] => {
 		)
 		.toSorted((a, b) => a.profile.localeCompare(b.profile) || a.endpoint.localeCompare(b.endpoint));
 };
+
+export const filterRateLimitRows = (rows: RateLimitRow[], query: string) => {
+	const needle = query.trim().toLowerCase();
+	return needle ? rows.filter((row) => `${row.profile} ${row.endpoint}`.toLowerCase().includes(needle)) : rows;
+};
