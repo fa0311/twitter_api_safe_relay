@@ -1,4 +1,4 @@
-FROM node:24-bookworm AS builder
+FROM node:26-bookworm AS builder
 
 WORKDIR /app
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
@@ -12,7 +12,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm build
 
-FROM node:24-bookworm AS prod-deps
+FROM node:26-bookworm AS prod-deps
 
 WORKDIR /app
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
@@ -23,7 +23,7 @@ COPY --parents packages/*/package.json ./
 
 RUN pnpm install --frozen-lockfile --prod
 
-FROM node:24-bookworm-slim AS runtime-base
+FROM node:26-bookworm-slim AS runtime-base
 
 WORKDIR /app
 
