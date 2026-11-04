@@ -2,7 +2,7 @@ FROM node:26-bookworm AS builder
 
 WORKDIR /app
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
-RUN corepack enable
+RUN npm install -g corepack && corepack enable
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY --parents packages/*/package.json ./
@@ -16,7 +16,7 @@ FROM node:26-bookworm AS prod-deps
 
 WORKDIR /app
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
-RUN corepack enable
+RUN npm install -g corepack && corepack enable
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY --parents packages/*/package.json ./
@@ -30,7 +30,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
-RUN corepack enable
+RUN npm install -g corepack && corepack enable
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
