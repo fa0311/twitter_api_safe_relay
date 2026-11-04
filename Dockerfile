@@ -1,8 +1,8 @@
-FROM node:24-bookworm AS builder
+FROM node:26-bookworm AS builder
 
 WORKDIR /app
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
-RUN corepack enable
+RUN npm install -g corepack && corepack enable
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY --parents packages/*/package.json ./
@@ -12,25 +12,25 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm build
 
-FROM node:24-bookworm AS prod-deps
+FROM node:26-bookworm AS prod-deps
 
 WORKDIR /app
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
-RUN corepack enable
+RUN npm install -g corepack && corepack enable
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY --parents packages/*/package.json ./
 
 RUN pnpm install --frozen-lockfile --prod
 
-FROM node:24-bookworm-slim AS runtime-base
+FROM node:26-bookworm-slim AS runtime-base
 
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
-RUN corepack enable
+RUN npm install -g corepack && corepack enable
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
