@@ -97,7 +97,7 @@ const catalog = collect([...previous, ...entries]);
 await fs.writeFile(values.out, toNdjson(catalog));
 if (values.responses !== undefined) {
 	await fs.mkdir(values.responses, { recursive: true });
-	for (const entry of catalog) {
+	for (const entry of catalog.filter((entry) => entry.response !== undefined)) {
 		await fs.writeFile(path.join(values.responses, `${entry.name}.json`), JSON.stringify(entry.response));
 	}
 }
