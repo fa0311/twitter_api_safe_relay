@@ -52,7 +52,7 @@
 		"@hono/mcp": "^0.3.2",
 		"@hono/node-server": "^2.1.6",
 		"@modelcontextprotocol/sdk": "^1.32.1",
-		"hono": "^4.13.13",
+		"hono": "^4.13.16",
 		"jq-wasm": "3.0.0-jq-1.8.2",
 		"ts-pattern": "^5.9.2",
 		"twitter-api-safe-relay": "workspace:*",
